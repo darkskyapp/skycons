@@ -39,6 +39,8 @@ var Skycon;
           puff(ctx, t + i / 5, cx, cy, rx, ry, rmin, rmax);
       },
       cloud = function(ctx, t, cx, cy, cw, s) {
+        t /= 30000;
+
         var a = cw * 0.21,
             b = cw * 0.12,
             c = cw * 0.24,
@@ -51,6 +53,8 @@ var Skycon;
         puffs(ctx, t, cx, cy, a, b, c - s, d - s);
       },
       sun = function(ctx, t, cx, cy, cw, s) {
+        t /= 120000;
+
         var a = cw * 0.25 - s * 0.5,
             b = cw * 0.32 + s * 0.5,
             c = cw * 0.50 - s * 0.5,
@@ -67,13 +71,15 @@ var Skycon;
         ctx.stroke();
 
         for(i = 8; i--; ) {
-          p = (t + i) * TWO_PI / 8;
+          p = (t + i / 8) * TWO_PI;
           cos = Math.cos(p);
           sin = Math.sin(p);
           line(ctx, cx + cos * b, cy + sin * b, cx + cos * c, cy + sin * c);
         }
       },
       moon = function(ctx, t, cx, cy, cw, s) {
+        t /= 20000;
+
         var a = cw * 0.29 - s * 0.5,
             b = cw * 0.06,
             c = Math.cos(t * TWO_PI),
@@ -84,7 +90,7 @@ var Skycon;
         ctx.lineWidth = s;
         ctx.lineCap = "round";
 
-        cx += c * b;
+        cx += (c + 0.5) * b;
 
         ctx.beginPath();
         ctx.arc(cx, cy, a, p + TWO_PI / 8, p + TWO_PI * 7 / 8, false);
@@ -154,7 +160,7 @@ var Skycon;
       this.pause();
       this.interval = setInterval(function() {
         self.clear();
-        draw(self.context, (Date.now() / period) % 1);
+        draw(self.context, Date.now());
       }, 1000 / 60);
     },
     pause: function() {
