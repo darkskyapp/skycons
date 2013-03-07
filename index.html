@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Skycons</title>
+
+    <style type="text/css">
+    </style>
+  </head>
+
+  <body>
+    <canvas id="clear-day" width="64" height="64">
+    </canvas>
+
+    <canvas id="clear-night" width="64" height="64">
+    </canvas>
+
+    <canvas id="partly-cloudy-day" width="64" height="64">
+    </canvas>
+
+    <canvas id="partly-cloudy-night" width="64" height="64">
+    </canvas>
+
+    <canvas id="cloudy" width="64" height="64">
+    </canvas>
+
+    <canvas id="rain" width="64" height="64">
+    </canvas>
+
+    <canvas id="sleet" width="64" height="64">
+    </canvas>
+
+    <canvas id="snow" width="64" height="64">
+    </canvas>
+
+    <canvas id="wind" width="64" height="64">
+    </canvas>
+
+    <canvas id="fog" width="64" height="64">
+    </canvas>
+
+    <script src="skycon.js">
+    </script>
+
+    <script>
+      new Skycon("clear-day").play(Skycon.CLEAR_DAY, 30000);
+      new Skycon("partly-cloudy-day").play(Skycon.PARTLY_CLOUDY_DAY, 30000);
+      new Skycon("partly-cloudy-night").play(Skycon.PARTLY_CLOUDY_NIGHT, 30000);
+      new Skycon("cloudy").play(Skycon.CLOUDY, 30000);
+    </script>
+  </body>
+</html>
