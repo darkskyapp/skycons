@@ -119,6 +119,25 @@ var Skycon;
           ctx.fill();
         }
       },
+      sleet = function(ctx, t, cx, cy, cw, s) {
+        t /= 750;
+
+        var a = cw * 0.16,
+            b = TWO_PI * 11 / 12,
+            c = TWO_PI *  7 / 12,
+            i, p, x, y;
+
+        ctx.strokeStyle = BLACK;
+        ctx.lineWidth = s * 0.5;
+        ctx.lineCap = "round";
+
+        for(i = 4; i--; ) {
+          p = (t + i / 4) % 1;
+          x = cx + ((i - 1.5) / 1.5) * (i === 1 || i === 2 ? -1 : 1) * a;
+          y = cy + p * cw;
+          line(ctx, x, y - s * 1.5, x, y + s * 1.5);
+        }
+      },
       snow = function(ctx, t, cx, cy, cw, s) {
         t /= 3000;
 
@@ -135,7 +154,6 @@ var Skycon;
             wy = Math.sin(w) * b,
             i, p, x, y;
 
-        ctx.fillStyle = BLACK;
         ctx.strokeStyle = BLACK;
         ctx.lineWidth = s * 0.5;
         ctx.lineCap = "round";
@@ -209,20 +227,21 @@ var Skycon;
     cloud(ctx, t, w * 0.5, h * 0.37, s * 0.9, s * STROKE);
   };
 
+  Skycon.SLEET = function(ctx, t) {
+    var w = ctx.canvas.width,
+        h = ctx.canvas.height,
+        s = Math.min(w, h);
+
+    sleet(ctx, t, w * 0.5, h * 0.37, s * 0.9, s * STROKE);
+    cloud(ctx, t, w * 0.5, h * 0.37, s * 0.9, s * STROKE);
+  };
+
   Skycon.SNOW = function(ctx, t) {
     var w = ctx.canvas.width,
         h = ctx.canvas.height,
         s = Math.min(w, h);
 
     snow(ctx, t, w * 0.5, h * 0.37, s * 0.9, s * STROKE);
-    cloud(ctx, t, w * 0.5, h * 0.37, s * 0.9, s * STROKE);
-  };
-
-  Skycon.SLEET = function(ctx, t) {
-    var w = ctx.canvas.width,
-        h = ctx.canvas.height,
-        s = Math.min(w, h);
-
     cloud(ctx, t, w * 0.5, h * 0.37, s * 0.9, s * STROKE);
   };
 
