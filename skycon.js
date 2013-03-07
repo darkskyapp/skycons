@@ -118,6 +118,37 @@ var Skycon;
           ctx.arc(x, y, s * 0.75, b, c, false);
           ctx.fill();
         }
+      },
+      snow = function(ctx, t, cx, cy, cw, s) {
+        t /= 3000;
+
+        var a  = cw * 0.16,
+            b  = s * 0.75,
+            u  = t * TWO_PI * 0.7,
+            ux = Math.cos(u) * b,
+            uy = Math.sin(u) * b,
+            v  = u + TWO_PI / 3,
+            vx = Math.cos(v) * b,
+            vy = Math.sin(v) * b,
+            w  = u + TWO_PI * 2 / 3,
+            wx = Math.cos(w) * b,
+            wy = Math.sin(w) * b,
+            i, p, x, y;
+
+        ctx.fillStyle = BLACK;
+        ctx.strokeStyle = BLACK;
+        ctx.lineWidth = s * 0.5;
+        ctx.lineCap = "round";
+
+        for(i = 4; i--; ) {
+          p = (t + i / 4) % 1;
+          x = cx + Math.sin((p + i / 4) * TWO_PI) * a;
+          y = cy + p * cw;
+
+          line(ctx, x - ux, y - uy, x + ux, y + uy);
+          line(ctx, x - vx, y - vy, x + vx, y + vy);
+          line(ctx, x - wx, y - wy, x + wx, y + wy);
+        }
       };
 
   Skycon = function(id) {
@@ -178,15 +209,16 @@ var Skycon;
     cloud(ctx, t, w * 0.5, h * 0.37, s * 0.9, s * STROKE);
   };
 
-  Skycon.SLEET = function(ctx, t) {
+  Skycon.SNOW = function(ctx, t) {
     var w = ctx.canvas.width,
         h = ctx.canvas.height,
         s = Math.min(w, h);
 
+    snow(ctx, t, w * 0.5, h * 0.37, s * 0.9, s * STROKE);
     cloud(ctx, t, w * 0.5, h * 0.37, s * 0.9, s * STROKE);
   };
 
-  Skycon.SNOW = function(ctx, t) {
+  Skycon.SLEET = function(ctx, t) {
     var w = ctx.canvas.width,
         h = ctx.canvas.height,
         s = Math.min(w, h);
@@ -197,7 +229,8 @@ var Skycon;
   Skycon.prototype = {
     clear: function() {
       var canvas = this.context.canvas;
-      this.context.clearRect(0, 0, canvas.width, canvas.height);
+      this.context.fillStyle = WHITE;
+      this.context.fillRect(0, 0, canvas.width, canvas.height);
     },
     play: function(draw) {
       var self = this;
