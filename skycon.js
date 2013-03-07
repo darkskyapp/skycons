@@ -154,7 +154,7 @@ var Skycon;
       var canvas = this.context.canvas;
       this.context.clearRect(0, 0, canvas.width, canvas.height);
     },
-    play: function(draw, period) {
+    play: function(draw) {
       var self = this;
 
       this.pause();
