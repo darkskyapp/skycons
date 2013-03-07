@@ -5,8 +5,9 @@ var Skycon;
 
   var BLACK  = "#222",
       WHITE  = "#FFF",
-      STROKE = 0.085,
+      STROKE = 0.09375,
       TWO_PI = 2.0 * Math.PI,
+      TWO_OVER_SQRT_2 = 2.0 / Math.sqrt(2),
       circle = function(ctx, x, y, r) {
         ctx.beginPath();
         ctx.arc(x, y, r, 0, TWO_PI, false);
@@ -50,20 +51,20 @@ var Skycon;
         puffs(ctx, t, cx, cy, a, b, c - s, d - s);
       },
       sun = function(ctx, t, cx, cy, cw, s) {
-        var a = cw * 0.25,
+        var a = cw * 0.25 - s * 0.5,
             b = cw * 0.32 + s * 0.5,
             c = cw * 0.50 - s * 0.5,
             i, p, cos, sin;
 
-        ctx.fillStyle = BLACK;
-        circle(ctx, cx, cy, a);
-
         ctx.fillStyle = WHITE;
-        circle(ctx, cx, cy, a - s);
-
         ctx.strokeStyle = BLACK;
         ctx.lineWidth = s;
         ctx.lineCap = "round";
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, a, 0, TWO_PI, false);
+        ctx.fill();
+        ctx.stroke();
 
         for(i = 8; i--; ) {
           p = (t + i) * TWO_PI / 8;
@@ -71,6 +72,26 @@ var Skycon;
           sin = Math.sin(p);
           line(ctx, cx + cos * b, cy + sin * b, cx + cos * c, cy + sin * c);
         }
+      },
+      moon = function(ctx, t, cx, cy, cw, s) {
+        var a = cw * 0.29 - s * 0.5,
+            b = cw * 0.06,
+            c = Math.cos(t * TWO_PI),
+            p = c * TWO_PI / -16;
+
+        ctx.fillStyle = WHITE;
+        ctx.strokeStyle = BLACK;
+        ctx.lineWidth = s;
+        ctx.lineCap = "round";
+
+        cx += c * b;
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, a, p + TWO_PI / 8, p + TWO_PI * 7 / 8, false);
+        ctx.arc(cx + Math.cos(p) * a * TWO_OVER_SQRT_2, cy + Math.sin(p) * a * TWO_OVER_SQRT_2, a, p + TWO_PI * 5 / 8, p + TWO_PI * 3 / 8, true);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
       };
 
   Skycon = function(id) {
@@ -88,6 +109,14 @@ var Skycon;
     sun(ctx, t, w * 0.5, h * 0.5, s, s * STROKE);
   };
 
+  Skycon.CLEAR_NIGHT = function(ctx, t) {
+    var w = ctx.canvas.width,
+        h = ctx.canvas.height,
+        s = Math.min(w, h);
+
+    moon(ctx, t, w * 0.5, h * 0.5, s, s * STROKE);
+  };
+
   Skycon.PARTLY_CLOUDY_DAY = function(ctx, t) {
     var w = ctx.canvas.width,
         h = ctx.canvas.height,
@@ -102,6 +131,7 @@ var Skycon;
         h = ctx.canvas.height,
         s = Math.min(w, h);
 
+    moon(ctx, t, w * 0.625, h * 0.375, s * 0.75, s * STROKE);
     cloud(ctx, t, w * 0.375, h * 0.625, s * 0.75, s * STROKE);
   };
 
