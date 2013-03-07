@@ -167,6 +167,61 @@ var Skycon;
           line(ctx, x - vx, y - vy, x + vx, y + vy);
           line(ctx, x - wx, y - wy, x + wx, y + wy);
         }
+      },
+      swoosh = function(ctx, t, cx, cy, r, tail, up) {
+        var a = tail,
+            b = r * TWO_PI * 5 / 8,
+            c = (a * 2) / (a + b),
+            ty, sa, ea;
+
+        if(up) {
+          ty = cy + r;
+          sa = TWO_PI *  2 / 8;
+          ea = TWO_PI * -3 / 8;
+        }
+
+        else {
+          ty = cy - r;
+          sa = TWO_PI * -2 / 8;
+          ea = TWO_PI *  3 / 8;
+        }
+
+        t = (t % 1) * 8;
+
+        ctx.beginPath();
+
+        if(t < c) {
+          t = 1 - t / c;
+          ctx.moveTo(cx - tail * t, ty);
+          ctx.arc(cx, cy, r, sa, ea, up);
+        }
+
+        else if(t < 2) {
+          t = 1 - (t - c) / (2 - c);
+          ctx.arc(cx, cy, r, ea + (sa - ea) * t, ea, up);
+        }
+
+        else if(t < 3) {
+        }
+
+        else if(t < 3 + c) {
+          t = 1 - (t - 3) / c;
+          ctx.moveTo(cx - tail, ty);
+          ctx.lineTo(cx - tail * t, ty);
+        }
+
+        else if(t < 5) {
+          t = 1 - (t - (3 + c)) / (2 - c);
+          ctx.moveTo(cx - tail, ty);
+          ctx.arc(cx, cy, r, sa, ea + (sa - ea) * t, up);
+        }
+
+        else {
+          ctx.moveTo(cx - tail, ty);
+          ctx.arc(cx, cy, r, sa, ea, up);
+        }
+
+        ctx.stroke();
       };
 
   Skycon = function(id) {
@@ -243,6 +298,25 @@ var Skycon;
 
     snow(ctx, t, w * 0.5, h * 0.37, s * 0.9, s * STROKE);
     cloud(ctx, t, w * 0.5, h * 0.37, s * 0.9, s * STROKE);
+  };
+
+  Skycon.WIND = function(ctx, t) {
+    t /= 4000;
+
+    var w = ctx.canvas.width,
+        h = ctx.canvas.height,
+        cx = w * 0.5,
+        cy = h * 0.5,
+        cw = Math.min(w, h),
+        s  = cw * STROKE;
+
+    ctx.strokeStyle = BLACK;
+    ctx.lineWidth = s;
+    ctx.lineCap = "round";
+
+    swoosh(ctx, t       , cx, cy - s * 2, s * 1.5, cw * 0.5 - s * 0.5, true);
+    swoosh(ctx, t - 0.04, cx + cw * 0.25, cy + s * 2, s, cw * 0.5 - s * 0.5, false);
+    swoosh(ctx, t - 0.13, cx + cw * 0.5 - s * 1.5, cy - s * 1.5, s, cw * 0.25 - s * 1.5, true);
   };
 
   Skycon.prototype = {
