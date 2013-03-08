@@ -353,8 +353,8 @@ var Skycon;
     ctx.lineWidth = k;
     ctx.lineCap = "round";
 
-    line(ctx, a + w * 0.15 + k * 0.5, n - k * 0.5, b + w * 0.85 - k * 0.5, n - k * 0.5);
-    line(ctx, c + w * 0.15 + k * 0.5, n - k * 2.5, d + w * 0.85 - k * 0.5, n - k * 2.5);
+    line(ctx, a + w * 0.2 + k * 0.5, n - k * 0.5, b + w * 0.8 - k * 0.5, n - k * 0.5);
+    line(ctx, c + w * 0.2 + k * 0.5, n - k * 2.5, d + w * 0.8 - k * 0.5, n - k * 2.5);
   };
 
   Skycon.prototype = {
