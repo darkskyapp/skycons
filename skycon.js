@@ -78,10 +78,10 @@ var Skycon;
         }
       },
       moon = function(ctx, t, cx, cy, cw, s) {
-        t /= 20000;
+        t /= 15000;
 
         var a = cw * 0.29 - s * 0.5,
-            b = cw * 0.06,
+            b = cw * 0.05,
             c = Math.cos(t * TWO_PI),
             p = c * TWO_PI / -16;
 
@@ -90,7 +90,7 @@ var Skycon;
         ctx.lineWidth = s;
         ctx.lineCap = "round";
 
-        cx += (c + 0.5) * b;
+        cx += c * b;
 
         ctx.beginPath();
         ctx.arc(cx, cy, a, p + TWO_PI / 8, p + TWO_PI * 7 / 8, false);
@@ -222,6 +222,20 @@ var Skycon;
         }
 
         ctx.stroke();
+      },
+      fogbank = function(ctx, t, cx, cy, cw, s) {
+        t /= 30000;
+
+        var a = cw * 0.21,
+            b = cw * 0.06,
+            c = cw * 0.21,
+            d = cw * 0.28;
+
+        ctx.fillStyle = BLACK;
+        puffs(ctx, t, cx, cy, a, b, c, d);
+
+        ctx.fillStyle = WHITE;
+        puffs(ctx, t, cx, cy, a, b, c - s, d - s);
       };
 
   Skycon = function(id) {
@@ -261,7 +275,7 @@ var Skycon;
         h = ctx.canvas.height,
         s = Math.min(w, h);
 
-    moon(ctx, t, w * 0.625, h * 0.375, s * 0.75, s * STROKE);
+    moon(ctx, t, w * 0.667, h * 0.375, s * 0.75, s * STROKE);
     cloud(ctx, t, w * 0.375, h * 0.625, s * 0.75, s * STROKE);
   };
 
@@ -317,6 +331,29 @@ var Skycon;
     swoosh(ctx, t       , cx, cy - s * 2, s * 1.5, cw * 0.5 - s * 0.5, true);
     swoosh(ctx, t - 0.04, cx + cw * 0.25, cy + s * 2, s, cw * 0.5 - s * 0.5, false);
     swoosh(ctx, t - 0.13, cx + cw * 0.5 - s * 1.5, cy - s * 1.5, s, cw * 0.25 - s * 1.5, true);
+  };
+
+  Skycon.FOG = function(ctx, t) {
+    var w = ctx.canvas.width,
+        h = ctx.canvas.height,
+        s = Math.min(w, h),
+        k = s * STROKE;
+
+    fogbank(ctx, t, w * 0.5, h * 0.32, s * 0.9, k);
+
+    t /= 5000;
+
+    var a = Math.cos((t       ) * TWO_PI) * s * 0.02,
+        b = Math.cos((t + 0.25) * TWO_PI) * s * 0.02,
+        c = Math.cos((t + 0.50) * TWO_PI) * s * 0.02,
+        d = Math.cos((t + 0.75) * TWO_PI) * s * 0.02;
+
+    ctx.strokeStyle = BLACK;
+    ctx.lineWidth = k;
+    ctx.lineCap = "round";
+
+    line(ctx, a + w * 0.15 + k * 0.5, h - k * 0.5, b + w * 0.85 - k * 0.5, h - k * 0.5);
+    line(ctx, c + w * 0.15 + k * 0.5, h - k * 2.5, d + w * 0.85 - k * 0.5, h - k * 2.5);
   };
 
   Skycon.prototype = {
