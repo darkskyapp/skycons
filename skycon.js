@@ -339,21 +339,22 @@ var Skycon;
         s = Math.min(w, h),
         k = s * STROKE;
 
-    fogbank(ctx, t, w * 0.5, h * 0.32, s * 0.9, k);
+    fogbank(ctx, t, w * 0.5, h * 0.32, s * 0.75, k);
 
     t /= 5000;
 
     var a = Math.cos((t       ) * TWO_PI) * s * 0.02,
         b = Math.cos((t + 0.25) * TWO_PI) * s * 0.02,
         c = Math.cos((t + 0.50) * TWO_PI) * s * 0.02,
-        d = Math.cos((t + 0.75) * TWO_PI) * s * 0.02;
+        d = Math.cos((t + 0.75) * TWO_PI) * s * 0.02,
+        n = h * 0.936;
 
     ctx.strokeStyle = BLACK;
     ctx.lineWidth = k;
     ctx.lineCap = "round";
 
-    line(ctx, a + w * 0.15 + k * 0.5, h - k * 0.5, b + w * 0.85 - k * 0.5, h - k * 0.5);
-    line(ctx, c + w * 0.15 + k * 0.5, h - k * 2.5, d + w * 0.85 - k * 0.5, h - k * 2.5);
+    line(ctx, a + w * 0.15 + k * 0.5, n - k * 0.5, b + w * 0.85 - k * 0.5, n - k * 0.5);
+    line(ctx, c + w * 0.15 + k * 0.5, n - k * 2.5, d + w * 0.85 - k * 0.5, n - k * 2.5);
   };
 
   Skycon.prototype = {
