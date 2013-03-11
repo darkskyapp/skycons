@@ -238,10 +238,8 @@ var Skycon;
         puffs(ctx, t, cx, cy, a, b, c - s, d - s);
       };
 
-  Skycon = function(id) {
-    var canvas = document.getElementById(id);
-
-    this.context  = canvas.getContext("2d");
+  Skycon = function() {
+    this.list     = [];
     this.interval = undefined;
   };
 
@@ -358,18 +356,29 @@ var Skycon;
   };
 
   Skycon.prototype = {
-    clear: function() {
-      var canvas = this.context.canvas;
-      this.context.fillStyle = WHITE;
-      this.context.fillRect(0, 0, canvas.width, canvas.height);
+    set: function(id, draw) {
+      /* FIXME: look through the list and try to update the relevant id first */
+      this.list.push({
+        id: id,
+        ctx: document.getElementById("id").getContext("2d"),
+        func: draw
+      });
     },
     play: function(draw) {
-      var self = this;
+      var list = this.list;
 
       this.pause();
       this.interval = setInterval(function() {
-        self.clear();
-        draw(self.context, Date.now());
+        var now = Date.now(),
+            i   = list.length,
+            obj;
+
+        while(i--) {
+          obj = list[i];
+          obj.ctx.fillStyle = WHITE;
+          obj.ctx.fillRect(0, 0, obj.ctx.canvas.width, obj.ctx.canvas.height);
+          obj.func(obj.ctx, now);
+        }
       }, 1000 / 60);
     },
     pause: function() {
