@@ -3,7 +3,8 @@ var Skycon;
 (function() {
   "use strict";
 
-  var BLACK  = "#222",
+  var KEYFRAME = 500,
+      BLACK  = "#222",
       WHITE  = "#FFF",
       STROKE = 0.09375,
       TWO_PI = 2.0 * Math.PI,
@@ -389,11 +390,14 @@ var Skycon;
 
   Skycon.prototype = {
     add: function(id, draw) {
-      this.list.push({
-        id: id,
-        ctx: document.getElementById(id).getContext("2d"),
-        func: draw
-      });
+      var obj = {
+            id: id,
+            ctx: document.getElementById(id).getContext("2d"),
+            func: draw
+          };
+
+      this.list.push(obj);
+      this.draw(obj, KEYFRAME);
     },
     set: function(id, draw) {
       var i;
@@ -401,6 +405,7 @@ var Skycon;
       for(i = this.list.length; i--; )
         if(this.list[i].id === id) {
           this.list[i].func = draw;
+          this.draw(this.list[i], KEYFRAME);
           return;
         }
 
@@ -415,26 +420,32 @@ var Skycon;
           return;
         }
     },
+    draw: function(obj, time) {
+      obj.ctx.fillStyle = WHITE;
+      obj.ctx.fillRect(0, 0, obj.ctx.canvas.width, obj.ctx.canvas.height);
+      obj.func(obj.ctx, time);
+    },
     play: function() {
-      var list = this.list;
+      var self = this;
 
       this.pause();
       this.interval = requestInterval(function() {
         var now = Date.now(),
-            i, obj;
+            i;
 
-        for(i = list.length; i--; ) {
-          obj = list[i];
-          obj.ctx.fillStyle = WHITE;
-          obj.ctx.fillRect(0, 0, obj.ctx.canvas.width, obj.ctx.canvas.height);
-          obj.func(obj.ctx, now);
-        }
+        for(i = self.list.length; i--; )
+          self.draw(self.list[i], now);
       }, 1000 / 60);
     },
     pause: function() {
+      var i;
+
       if(this.interval) {
         cancelInterval(this.interval);
         this.interval = null;
+
+        for(i = this.list.length; i--; )
+          this.draw(this.list[i], KEYFRAME);
       }
     }
   };

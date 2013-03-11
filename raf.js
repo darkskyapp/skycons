@@ -16,9 +16,12 @@ var requestInterval, cancelInterval;
 
   if(raf && caf) {
     requestInterval = function(fn) {
-      var handle = {value: null};
+      var handle = {value: null, stop: false};
 
       function loop() {
+        if(handle.stop)
+          return;
+
         handle.value = raf(loop);
         fn();
       }
@@ -28,6 +31,7 @@ var requestInterval, cancelInterval;
     };
 
     cancelInterval = function(handle) {
+      handle.stop = true;
       caf(handle.value);
     };
   }
