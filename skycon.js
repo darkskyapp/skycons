@@ -122,7 +122,7 @@ var Skycon;
       sleet = function(ctx, t, cx, cy, cw, s) {
         t /= 750;
 
-        var a = cw * 0.16,
+        var a = cw * 0.18,
             b = TWO_PI * 11 / 12,
             c = TWO_PI *  7 / 12,
             i, p, x, y;
@@ -240,7 +240,7 @@ var Skycon;
 
   Skycon = function() {
     this.list     = [];
-    this.interval = undefined;
+    this.interval = null;
   };
 
   Skycon.CLEAR_DAY = function(ctx, t) {
@@ -360,20 +360,19 @@ var Skycon;
       /* FIXME: look through the list and try to update the relevant id first */
       this.list.push({
         id: id,
-        ctx: document.getElementById("id").getContext("2d"),
+        ctx: document.getElementById(id).getContext("2d"),
         func: draw
       });
     },
-    play: function(draw) {
+    play: function() {
       var list = this.list;
 
       this.pause();
       this.interval = setInterval(function() {
         var now = Date.now(),
-            i   = list.length,
-            obj;
+            i, obj;
 
-        while(i--) {
+        for(i = list.length; i--; ) {
           obj = list[i];
           obj.ctx.fillStyle = WHITE;
           obj.ctx.fillRect(0, 0, obj.ctx.canvas.width, obj.ctx.canvas.height);
@@ -384,7 +383,7 @@ var Skycon;
     pause: function() {
       if(this.interval) {
         clearInterval(this.interval);
-        this.interval = undefined;
+        this.interval = null;
       }
     }
   };

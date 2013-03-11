@@ -45,16 +45,20 @@
     </script>
 
     <script>
-      new Skycon("clear-day").play(Skycon.CLEAR_DAY);
-      new Skycon("clear-night").play(Skycon.CLEAR_NIGHT);
-      new Skycon("partly-cloudy-day").play(Skycon.PARTLY_CLOUDY_DAY);
-      new Skycon("partly-cloudy-night").play(Skycon.PARTLY_CLOUDY_NIGHT);
-      new Skycon("cloudy").play(Skycon.CLOUDY);
-      new Skycon("rain").play(Skycon.RAIN);
-      new Skycon("sleet").play(Skycon.SLEET);
-      new Skycon("snow").play(Skycon.SNOW);
-      new Skycon("wind").play(Skycon.WIND);
-      new Skycon("fog").play(Skycon.FOG);
+      var icons = new Skycon();
+
+      icons.set("clear-day", Skycon.CLEAR_DAY);
+      icons.set("clear-night", Skycon.CLEAR_NIGHT);
+      icons.set("partly-cloudy-day", Skycon.PARTLY_CLOUDY_DAY);
+      icons.set("partly-cloudy-night", Skycon.PARTLY_CLOUDY_NIGHT);
+      icons.set("cloudy", Skycon.CLOUDY);
+      icons.set("rain", Skycon.RAIN);
+      icons.set("sleet", Skycon.SLEET);
+      icons.set("snow", Skycon.SNOW);
+      icons.set("wind", Skycon.WIND);
+      icons.set("fog", Skycon.FOG);
+
+      icons.play();
     </script>
   </body>
 </html>
