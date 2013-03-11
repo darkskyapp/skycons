@@ -388,13 +388,32 @@ var Skycon;
   };
 
   Skycon.prototype = {
-    set: function(id, draw) {
-      /* FIXME: look through the list and try to update the relevant id first */
+    add: function(id, draw) {
       this.list.push({
         id: id,
         ctx: document.getElementById(id).getContext("2d"),
         func: draw
       });
+    },
+    set: function(id, draw) {
+      var i;
+
+      for(i = this.list.length; i--; )
+        if(this.list[i].id === id) {
+          this.list[i].func = draw;
+          return;
+        }
+
+      this.add(id, draw);
+    },
+    remove: function(id) {
+      var i;
+
+      for(i = this.list.length; i--; )
+        if(this.list[i].id === id) {
+          this.list.splice(i, 1);
+          return;
+        }
     },
     play: function() {
       var list = this.list;
