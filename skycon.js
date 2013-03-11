@@ -365,7 +365,7 @@ var Skycon;
       var list = this.list;
 
       this.pause();
-      this.interval = setInterval(function() {
+      this.interval = requestInterval(function() {
         var now = Date.now(),
             i, obj;
 
@@ -379,7 +379,7 @@ var Skycon;
     },
     pause: function() {
       if(this.interval) {
-        clearInterval(this.interval);
+        cancelInterval(this.interval);
         this.interval = null;
       }
     }
