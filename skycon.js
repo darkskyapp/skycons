@@ -122,7 +122,7 @@ var Skycon;
       sleet = function(ctx, t, cx, cy, cw, s) {
         t /= 750;
 
-        var a = cw * 0.18,
+        var a = cw * 0.1875,
             b = TWO_PI * 11 / 12,
             c = TWO_PI *  7 / 12,
             i, p, x, y;
@@ -133,7 +133,7 @@ var Skycon;
 
         for(i = 4; i--; ) {
           p = (t + i / 4) % 1;
-          x = cx + ((i - 1.5) / 1.5) * (i === 1 || i === 2 ? -1 : 1) * a;
+          x = Math.floor(cx + ((i - 1.5) / 1.5) * (i === 1 || i === 2 ? -1 : 1) * a) + 0.5;
           y = cy + p * cw;
           line(ctx, x, y - s * 1.5, x, y + s * 1.5);
         }
@@ -186,7 +186,7 @@ var Skycon;
           ea = TWO_PI *  3 / 8;
         }
 
-        t = (t % 1) * 8;
+        t = (t % 1) * 4;
 
         ctx.beginPath();
 
@@ -201,17 +201,14 @@ var Skycon;
           ctx.arc(cx, cy, r, ea + (sa - ea) * t, ea, up);
         }
 
-        else if(t < 3) {
-        }
-
-        else if(t < 3 + c) {
-          t = 1 - (t - 3) / c;
+        else if(t < 2 + c) {
+          t = 1 - (t - 2) / c;
           ctx.moveTo(cx - tail, ty);
           ctx.lineTo(cx - tail * t, ty);
         }
 
-        else if(t < 5) {
-          t = 1 - (t - (3 + c)) / (2 - c);
+        else if(t < 4) {
+          t = 1 - (t - (2 + c)) / (2 - c);
           ctx.moveTo(cx - tail, ty);
           ctx.arc(cx, cy, r, sa, ea + (sa - ea) * t, up);
         }
@@ -327,8 +324,8 @@ var Skycon;
     ctx.lineCap = "round";
 
     swoosh(ctx, t       , cx, cy - s * 2, s * 1.5, cw * 0.5 - s * 0.5, true);
-    swoosh(ctx, t - 0.04, cx + cw * 0.25, cy + s * 2, s, cw * 0.5 - s * 0.5, false);
-    swoosh(ctx, t - 0.13, cx + cw * 0.5 - s * 1.5, cy - s * 1.5, s, cw * 0.25 - s * 1.5, true);
+    swoosh(ctx, t - 0.33, cx + cw * 0.25, cy + s * 2, s, cw * 0.5 - s * 0.5, false);
+    swoosh(ctx, t - 0.67, cx + cw * 0.5 - s * 1.5, cy - s * 1.5, s, cw * 0.25 - s * 1.5, true);
   };
 
   Skycon.FOG = function(ctx, t) {
