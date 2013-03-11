@@ -168,11 +168,18 @@ var Skycon;
           line(ctx, x - wx, y - wy, x + wx, y + wy);
         }
       },
-      swoosh = function(ctx, t, cx, cy, r, tail, up) {
-        var a = tail,
-            b = r * TWO_PI * 5 / 8,
-            c = (a * 2) / (a + b),
-            ty, sa, ea;
+      clamp = function(x) {
+        return x < 0 ? 0 : x < 1 ? x : 1;
+      },
+      swoosh = function(ctx, from, to, stroke, cx, cy, r, tail, up) {
+        var a = stroke * 0.5,
+            b = tail,
+            c = r * TWO_PI * 5 / 8,
+            d = 1 / (a + a + b + c),
+            e = a * d,
+            f = (a + b) * d,
+            g = (a + b + c) * d,
+            ty, sa, ea, t;
 
         if(up) {
           ty = cy + r;
@@ -186,39 +193,69 @@ var Skycon;
           ea = TWO_PI *  3 / 8;
         }
 
-        t = (t % 1) * 4;
+        ctx.fillStyle = BLACK;
+        ctx.strokeStyle = BLACK;
+        ctx.lineWidth = stroke;
+        ctx.lineCap = "round";
 
         ctx.beginPath();
 
-        if(t < c) {
-          t = 1 - t / c;
-          ctx.moveTo(cx - tail * t, ty);
-          ctx.arc(cx, cy, r, sa, ea, up);
+        if(to < e) {
+          ctx.arc(
+            cx - tail,
+            ty,
+            clamp(to / e) * stroke * 0.5,
+            0,
+            TWO_PI,
+            false
+          );
+
+          ctx.fill();
         }
 
-        else if(t < 2) {
-          t = 1 - (t - c) / (2 - c);
-          ctx.arc(cx, cy, r, ea + (sa - ea) * t, ea, up);
+        else if(from > g) {
+          ctx.arc(
+            cx + Math.cos(ea) * r,
+            cy + Math.sin(ea) * r,
+            clamp(1 - (from - g) / (1 - g)) * stroke * 0.5,
+            TWO_PI,
+            false
+          );
+
+          ctx.fill();
         }
 
-        else if(t < 2 + c) {
-          t = 1 - (t - 2) / c;
-          ctx.moveTo(cx - tail, ty);
-          ctx.lineTo(cx - tail * t, ty);
-        }
+        else if(from < f) {
+          ctx.moveTo(cx - tail * clamp(1 - from / f), ty);
 
-        else if(t < 4) {
-          t = 1 - (t - (2 + c)) / (2 - c);
-          ctx.moveTo(cx - tail, ty);
-          ctx.arc(cx, cy, r, sa, ea + (sa - ea) * t, up);
+          if(to < f)
+            ctx.lineTo(cx - tail * clamp(1 - to / f), ty);
+
+          else
+            ctx.arc(
+              cx,
+              cy,
+              r,
+              sa,
+              ea + (sa - ea) * clamp(1 - (to - f) / (1 - f)),
+              up
+            );
+
+          ctx.stroke();
         }
 
         else {
-          ctx.moveTo(cx - tail, ty);
-          ctx.arc(cx, cy, r, sa, ea, up);
-        }
+          ctx.arc(
+            cx,
+            cy,
+            r,
+            ea + (sa - ea) * clamp(1 - (from - f) / (1 - f)),
+            ea + (sa - ea) * clamp(1 - (to   - f) / (1 - f)),
+            up
+          );
 
-        ctx.stroke();
+          ctx.stroke();
+        }
       },
       fogbank = function(ctx, t, cx, cy, cw, s) {
         t /= 30000;
@@ -310,22 +347,20 @@ var Skycon;
   };
 
   Skycon.WIND = function(ctx, t) {
-    t /= 4000;
+    t /= 500;
 
     var w = ctx.canvas.width,
         h = ctx.canvas.height,
         cx = w * 0.5,
         cy = h * 0.5,
         cw = Math.min(w, h),
-        s  = cw * STROKE;
+        s  = cw * STROKE,
+        q  = t % 2;
 
-    ctx.strokeStyle = BLACK;
-    ctx.lineWidth = s;
-    ctx.lineCap = "round";
+    swoosh(ctx, q - 1, q, s, cx, cy - s * 2, s * 1.5, cw * 0.5 - s * 0.5, true);
+    swoosh(ctx, q - 1, q, s, cx + cw * 0.25, cy + s * 2, s, cw * 0.5 - s * 0.5, false);
+    swoosh(ctx, q - 1, q, s, cx + cw * 0.5 - s * 1.5, cy - s * 1.5, s, cw * 0.25 - s * 1.5, true);
 
-    swoosh(ctx, t       , cx, cy - s * 2, s * 1.5, cw * 0.5 - s * 0.5, true);
-    swoosh(ctx, t - 0.33, cx + cw * 0.25, cy + s * 2, s, cw * 0.5 - s * 0.5, false);
-    swoosh(ctx, t - 0.67, cx + cw * 0.5 - s * 1.5, cy - s * 1.5, s, cw * 0.25 - s * 1.5, true);
   };
 
   Skycon.FOG = function(ctx, t) {
