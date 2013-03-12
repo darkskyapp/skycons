@@ -48,109 +48,95 @@ var Skycon;
   }());
 
   /* Catmull-rom spline stuffs. */
-  function spline(points) {
-    var i = points.length,
-        c = points[--i],
-        b = points[--i],
-        a = points[--i],
-        j = i * 4,
-        coeffs = new Array(j),
-        d;
+  function upsample(n, spline) {
+    var polyline = [],
+        len = spline.length,
+        bx  = spline[0],
+        by  = spline[1],
+        cx  = spline[2],
+        cy  = spline[3],
+        dx  = spline[4],
+        dy  = spline[5],
+        i, j, ax, ay, px, qx, rx, sx, py, qy, ry, sy, t;
 
-    while(i) {
-      d = c;
-      c = b;
-      b = a;
-      a = points[--i];
+    for(i = 6; i !== spline.length; i += 2) {
+      ax = bx;
+      bx = cx;
+      cx = dx;
+      dx = spline[i    ];
+      px = -0.5 * ax + 1.5 * bx - 1.5 * cx + 0.5 * dx;
+      qx =        ax - 2.5 * bx + 2.0 * cx - 0.5 * dx;
+      rx = -0.5 * ax            + 0.5 * cx           ;
+      sx =                   bx                      ;
 
-      coeffs[--j] = -0.5 * a + 1.5 * b - 1.5 * c + 0.5 * d
-      coeffs[--j] =        a - 2.5 * b + 2.0 * c - 0.5 * d
-      coeffs[--j] = -0.5 * a           + 0.5 * c
-      coeffs[--j] =                  b
+      ay = by;
+      by = cy;
+      cy = dy;
+      dy = spline[i + 1];
+      py = -0.5 * ay + 1.5 * by - 1.5 * cy + 0.5 * dy;
+      qy =        ay - 2.5 * by + 2.0 * cy - 0.5 * dy;
+      ry = -0.5 * ay            + 0.5 * cy           ;
+      sy =                   by                      ;
+
+      for(j = 0; j !== n; ++j) {
+        t = j / n;
+
+        polyline.push(
+          ((px * t + qx) * t + rx) * t + sx,
+          ((py * t + qy) * t + ry) * t + sy
+        );
+      }
     }
 
-    return coeffs;
+    polyline.push(
+      px + qx + rx + sx,
+      py + qy + ry + sy
+    );
+
+    return polyline;
   }
 
-  function dist(x1, y1, x2, y2) {
-    x2 -= x1;
-    y2 -= y1;
-    return Math.sqrt(x2 * x2 + y2 * y2);
-  }
-
-  function length(x, y, off) {
+  function downsample(n, polyline) {
     var len = 0,
-        u = x[off] + x[off + 1] + x[off + 2] + x[off + 3],
-        v = y[off] + y[off + 1] + y[off + 2] + y[off + 3],
-        i, t, m, n;
+        i, dx, dy;
 
-    for(i = 64; i--; ) {
-      t = i / 64;
-      m = ((x[off + 3] * t + x[off + 2]) * t + x[off + 1]) * t + x[off];
-      n = ((y[off + 3] * t + y[off + 2]) * t + y[off + 1]) * t + y[off];
-
-      len += dist(u, v, m, n);
-      u = m;
-      v = n;
+    for(i = 2; i !== polyline.length; i += 2) {
+      dx = polyline[i    ] - polyline[i - 2];
+      dy = polyline[i + 1] - polyline[i - 1];
+      len += Math.sqrt(dx * dx + dy * dy);
     }
 
-    return len;
-  }
+    len /= n;
 
-  function lengths(x, y) {
-    var l = x.length / 4,
-        lens = new Array(l),
-        sum = 0,
-        i;
+    var small = [],
+        target = len,
+        min = 0,
+        max, t;
 
-    for(i = 0; i !== l; ++i) {
-      sum += length(x, y, i * 4);
-      lens[i] = sum;
+    small.push(polyline[0], polyline[1]);
+
+    for(i = 2; i !== polyline.length; i += 2) {
+      dx = polyline[i    ] - polyline[i - 2];
+      dy = polyline[i + 1] - polyline[i - 1];
+      max = min + Math.sqrt(dx * dx + dy * dy);
+
+      if(max > target) {
+        t = (target - min) / (max - min);
+
+        small.push(
+          polyline[i - 2] + dx * t,
+          polyline[i - 1] + dy * t
+        );
+
+        target += len;
+      }
+
+      min = max;
     }
 
-    for(i = 0; i !== l; ++i)
-      lens[i] /= sum;
+    small.push(polyline[polyline.length - 2], polyline[polyline.length - 1]);
 
-    return lens;
-  }
-
-  function remap(lens, x) {
-    if(x <= 0 || x >= 1)
-      return x;
-
-    var t = x * lens.length;
-
-    if(t < 1)
-      return lens[0] * t;
-
-    x  = Math.floor(t);
-    t -= x;
-
-    return lens[x - 1] * (1 - t) + lens[x] * t;
-  }
-
-  function evaluate(spline, x) {
-    var t;
-
-    if(x < 0) {
-      x = 0;
-      t = 0;
-    }
-
-    else if(x < 1) {
-      t  = x * spline.length / 4;
-      x  = Math.floor(t);
-      t -= x;
-      x *= 4;
-    }
-
-    else {
-      x = spline.length - 4;
-      t = 1;
-    }
-
-    return ((spline[x + 3] * t + spline[x + 2]) * t + spline[x + 1]) * t +
-      spline[x];
+    return small;
   }
 
   /* Define skycon things. */
@@ -344,29 +330,34 @@ var Skycon;
     ctx.globalCompositeOperation = 'source-over';
   }
 
-  var sx = spline([-0.8, -0.5, -0.2, -0.04, -0.07, -0.19, -0.23, -0.12, 0.02, 0.2, 0.5, 0.8]),
-      sy = spline([-0.18, 0.12, 0.12, -0.04, -0.18, -0.18, -0.05, 0.11, 0.16, 0.15, 0.07, 0.37]),
-      sl = lengths(sx, sy);
+  var WIND_PATH = downsample(48, upsample(8, [
+        -0.80, -0.18,
+        -0.50,  0.12,
+        -0.20,  0.12,
+        -0.04, -0.04,
+        -0.07, -0.18,
+        -0.19, -0.18,
+        -0.23, -0.05,
+        -0.12,  0.11,
+         0.02,  0.16,
+         0.20,  0.15,
+         0.50,  0.07,
+         0.80,  0.37
+      ]));
 
   function swoosh(ctx, t, cx, cy, cw, s, color) {
-    t /= 4000;
+    t /= 6000;
 
-    var end = t % 1 - 0.15,
-        start = end - 0.5,
-        i, width;
-
-    start = remap(sl, start);
-    end   = remap(sl, end);
-    width = end - start;
+    var i, x, y;
 
     ctx.strokeStyle = color;
     ctx.lineWidth = s;
     ctx.lineCap = "round";
 
     ctx.beginPath();
-    ctx.moveTo(cx + evaluate(sx, end) * cw, cy + evaluate(sy, end) * cw);
-    for(i = 32; i--; )
-      ctx.lineTo(cx + evaluate(sx, start + width * i / 32) * cw, cy + evaluate(sy, start + width * i / 32) * cw);
+    ctx.moveTo(cx + WIND_PATH[0] * cw, cy + WIND_PATH[1] * cw);
+    for(i = 2; i !== WIND_PATH.length; i += 2)
+      ctx.lineTo(cx + WIND_PATH[i] * cw, cy + WIND_PATH[i + 1] * cw);
     ctx.stroke();
   }
 
@@ -475,8 +466,8 @@ var Skycon;
         h = ctx.canvas.height,
         s = Math.min(w, h);
 
-    //swoosh(ctx, t, w * 0.5, h * 0.5, s, s * STROKE, color);
-    leaf(ctx, t, w * 0.5, h * 0.5, s, s * STROKE, color);
+    swoosh(ctx, t, w * 0.5, h * 0.5, s, s * STROKE, color);
+    //leaf(ctx, t, w * 0.5, h * 0.5, s, s * STROKE, color);
   };
 
   Skycon.FOG = function(ctx, t, color) {
