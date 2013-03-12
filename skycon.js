@@ -151,7 +151,7 @@ var Skycon;
   }
 
   function rain(ctx, t, cx, cy, cw, s, color) {
-    t /= 1500;
+    t /= 1350;
 
     var a = cw * 0.16,
         b = TWO_PI * 11 / 12,
@@ -238,6 +238,26 @@ var Skycon;
     ctx.globalCompositeOperation = 'source-over';
   }
 
+  function leaf(ctx, t, cx, cy, cw, s, color) {
+    t /= 6000;
+
+    var a = cw / 3,
+        b = 2 * a,
+        c = (t % 1) * TWO_PI,
+        d = Math.cos(c),
+        e = Math.sin(c);
+
+    ctx.strokeStyle = color;
+    ctx.lineWidth = s;
+    ctx.lineCap = "round";
+
+    ctx.beginPath();
+    ctx.arc(cx        , cy        , cw, c          , c + Math.PI, false);
+    ctx.arc(cx - a * d, cy - a * e,  b, c + Math.PI, c          , false);
+    ctx.arc(cx + b * d, cy + b * e,  a, c + Math.PI, c          , true );
+    ctx.stroke();
+  }
+
   Skycon = function(opts) {
     this.list     = [];
     this.interval = null;
@@ -314,6 +334,11 @@ var Skycon;
   };
 
   Skycon.WIND = function(ctx, t, color) {
+    var w = ctx.canvas.width,
+        h = ctx.canvas.height,
+        s = Math.min(w, h);
+
+    leaf(ctx, t, w * 0.5, h * 0.5, s / 6, s * STROKE, color);
   };
 
   Skycon.FOG = function(ctx, t, color) {
