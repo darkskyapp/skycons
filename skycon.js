@@ -151,7 +151,7 @@ var Skycon;
   }
 
   function rain(ctx, t, cx, cy, cw, s, color) {
-    t /= 1000;
+    t /= 1500;
 
     var a = cw * 0.16,
         b = TWO_PI * 11 / 12,
