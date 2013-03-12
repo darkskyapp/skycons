@@ -47,6 +47,112 @@ var Skycon;
     }
   }());
 
+  /* Catmull-rom spline stuffs. */
+  function spline(points) {
+    var i = points.length,
+        c = points[--i],
+        b = points[--i],
+        a = points[--i],
+        j = i * 4,
+        coeffs = new Array(j),
+        d;
+
+    while(i) {
+      d = c;
+      c = b;
+      b = a;
+      a = points[--i];
+
+      coeffs[--j] = -0.5 * a + 1.5 * b - 1.5 * c + 0.5 * d
+      coeffs[--j] =        a - 2.5 * b + 2.0 * c - 0.5 * d
+      coeffs[--j] = -0.5 * a           + 0.5 * c
+      coeffs[--j] =                  b
+    }
+
+    return coeffs;
+  }
+
+  function dist(x1, y1, x2, y2) {
+    x2 -= x1;
+    y2 -= y1;
+    return Math.sqrt(x2 * x2 + y2 * y2);
+  }
+
+  function length(x, y, off) {
+    var len = 0,
+        u = x[off] + x[off + 1] + x[off + 2] + x[off + 3],
+        v = y[off] + y[off + 1] + y[off + 2] + y[off + 3],
+        i, t, m, n;
+
+    for(i = 64; i--; ) {
+      t = i / 64;
+      m = ((x[off + 3] * t + x[off + 2]) * t + x[off + 1]) * t + x[off];
+      n = ((y[off + 3] * t + y[off + 2]) * t + y[off + 1]) * t + y[off];
+
+      len += dist(u, v, m, n);
+      u = m;
+      v = n;
+    }
+
+    return len;
+  }
+
+  function lengths(x, y) {
+    var l = x.length / 4,
+        lens = new Array(l),
+        sum = 0,
+        i;
+
+    for(i = 0; i !== l; ++i) {
+      sum += length(x, y, i * 4);
+      lens[i] = sum;
+    }
+
+    for(i = 0; i !== l; ++i)
+      lens[i] /= sum;
+
+    return lens;
+  }
+
+  function remap(lens, x) {
+    if(x <= 0 || x >= 1)
+      return x;
+
+    var t = x * lens.length;
+
+    if(t < 1)
+      return lens[0] * t;
+
+    x  = Math.floor(t);
+    t -= x;
+
+    return lens[x - 1] * (1 - t) + lens[x] * t;
+  }
+
+  function evaluate(spline, x) {
+    var t;
+
+    if(x < 0) {
+      x = 0;
+      t = 0;
+    }
+
+    else if(x < 1) {
+      t  = x * spline.length / 4;
+      x  = Math.floor(t);
+      t -= x;
+      x *= 4;
+    }
+
+    else {
+      x = spline.length - 4;
+      t = 1;
+    }
+
+    return ((spline[x + 3] * t + spline[x + 2]) * t + spline[x + 1]) * t +
+      spline[x];
+  }
+
   /* Define skycon things. */
   /* FIXME: I'm *really really* sorry that this code is so gross. Really, I am.
    * I'll try to clean it up eventually! Promise! */
@@ -238,23 +344,54 @@ var Skycon;
     ctx.globalCompositeOperation = 'source-over';
   }
 
-  function leaf(ctx, t, cx, cy, cw, s, color) {
-    t /= 6000;
+  var sx = spline([-0.8, -0.5, -0.2, -0.04, -0.07, -0.19, -0.23, -0.12, 0.02, 0.2, 0.5, 0.8]),
+      sy = spline([-0.18, 0.12, 0.12, -0.04, -0.18, -0.18, -0.05, 0.11, 0.16, 0.15, 0.07, 0.37]),
+      sl = lengths(sx, sy);
 
-    var a = cw / 3,
-        b = 2 * a,
-        c = (t % 1) * TWO_PI,
-        d = Math.cos(c),
-        e = Math.sin(c);
+  function swoosh(ctx, t, cx, cy, cw, s, color) {
+    t /= 4000;
+
+    var end = t % 1 - 0.15,
+        start = end - 0.5,
+        i, width;
+
+    start = remap(sl, start);
+    end   = remap(sl, end);
+    width = end - start;
 
     ctx.strokeStyle = color;
     ctx.lineWidth = s;
     ctx.lineCap = "round";
 
     ctx.beginPath();
-    ctx.arc(cx        , cy        , cw, c          , c + Math.PI, false);
-    ctx.arc(cx - a * d, cy - a * e,  b, c + Math.PI, c          , false);
-    ctx.arc(cx + b * d, cy + b * e,  a, c + Math.PI, c          , true );
+    ctx.moveTo(cx + evaluate(sx, end) * cw, cy + evaluate(sy, end) * cw);
+    for(i = 32; i--; )
+      ctx.lineTo(cx + evaluate(sx, start + width * i / 32) * cw, cy + evaluate(sy, start + width * i / 32) * cw);
+    ctx.stroke();
+  }
+
+  function leaf(ctx, t, cx, cy, cw, s, color) {
+    var x = cx + evaluate(sx, remap(sl, (t / 4000) % 1)) * cw,
+        y = cy + evaluate(sy, remap(sl, (t / 4000) % 1)) * cw,
+        a = cw / 6,
+        b = a / 3,
+        c = 2 * b,
+        d = ((t / 4000) % 1) * TWO_PI,
+        e = Math.cos(d),
+        f = Math.sin(d);
+
+    ctx.fillStyle = color;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = s;
+    ctx.lineCap = "round";
+
+    ctx.beginPath();
+    ctx.arc(x        , y        , a, d          , d + Math.PI, false);
+    ctx.arc(x - b * e, y - b * f, c, d + Math.PI, d          , false);
+    ctx.arc(x + c * e, y + c * f, b, d + Math.PI, d          , true );
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
     ctx.stroke();
   }
 
@@ -338,7 +475,8 @@ var Skycon;
         h = ctx.canvas.height,
         s = Math.min(w, h);
 
-    leaf(ctx, t, w * 0.5, h * 0.5, s / 6, s * STROKE, color);
+    //swoosh(ctx, t, w * 0.5, h * 0.5, s, s * STROKE, color);
+    leaf(ctx, t, w * 0.5, h * 0.5, s, s * STROKE, color);
   };
 
   Skycon.FOG = function(ctx, t, color) {
