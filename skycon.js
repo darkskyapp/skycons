@@ -1,12 +1,55 @@
+var requestInterval, cancelInterval;
+
+(function(global) {
+  "use strict";
+
+  var raf = global.requestAnimationFrame       ||
+            global.webkitRequestAnimationFrame ||
+            global.mozRequestAnimationFrame    ||
+            global.oRequestAnimationFrame      ||
+            global.msRequestAnimationFrame     ,
+      caf = global.cancelAnimationFrame        ||
+            global.webkitCancelAnimationFrame  ||
+            global.mozCancelAnimationFrame     ||
+            global.oCancelAnimationFrame       ||
+            global.msCancelAnimationFrame      ;
+
+  if(raf && caf) {
+    requestInterval = function(fn) {
+      var handle = {value: null, stop: false};
+
+      function loop() {
+        if(handle.stop)
+          return;
+
+        handle.value = raf(loop);
+        fn();
+      }
+
+      loop();
+      return handle;
+    };
+
+    cancelInterval = function(handle) {
+      handle.stop = true;
+      caf(handle.value);
+    };
+  }
+
+  else {
+    requestInterval = setInterval;
+    cancelInterval = clearInterval;
+  }
+}(this));
+
+
 var Skycon;
 
 (function() {
   "use strict";
 
   var KEYFRAME = 500,
-      BLACK  = "#222",
-      WHITE  = "#FFF",
-      STROKE = 0.09375,
+      STROKE = 0.08,
       TWO_PI = 2.0 * Math.PI,
       TWO_OVER_SQRT_2 = 2.0 / Math.sqrt(2),
       circle = function(ctx, x, y, r) {
@@ -39,7 +82,7 @@ var Skycon;
         for(i = 5; i--; )
           puff(ctx, t + i / 5, cx, cy, rx, ry, rmin, rmax);
       },
-      cloud = function(ctx, t, cx, cy, cw, s) {
+      cloud = function(ctx, t, cx, cy, cw, s, color) {
         t /= 30000;
 
         var a = cw * 0.21,
@@ -47,13 +90,14 @@ var Skycon;
             c = cw * 0.24,
             d = cw * 0.28;
 
-        ctx.fillStyle = BLACK;
+        ctx.fillStyle = color;
         puffs(ctx, t, cx, cy, a, b, c, d);
 
-        ctx.fillStyle = WHITE;
+        ctx.globalCompositeOperation = 'destination-out';
         puffs(ctx, t, cx, cy, a, b, c - s, d - s);
+        ctx.globalCompositeOperation = 'source-over';
       },
-      sun = function(ctx, t, cx, cy, cw, s) {
+      sun = function(ctx, t, cx, cy, cw, s, color) {
         t /= 120000;
 
         var a = cw * 0.25 - s * 0.5,
@@ -61,14 +105,12 @@ var Skycon;
             c = cw * 0.50 - s * 0.5,
             i, p, cos, sin;
 
-        ctx.fillStyle = WHITE;
-        ctx.strokeStyle = BLACK;
+        ctx.strokeStyle = color;
         ctx.lineWidth = s;
         ctx.lineCap = "round";
 
         ctx.beginPath();
         ctx.arc(cx, cy, a, 0, TWO_PI, false);
-        ctx.fill();
         ctx.stroke();
 
         for(i = 8; i--; ) {
@@ -78,7 +120,7 @@ var Skycon;
           line(ctx, cx + cos * b, cy + sin * b, cx + cos * c, cy + sin * c);
         }
       },
-      moon = function(ctx, t, cx, cy, cw, s) {
+      moon = function(ctx, t, cx, cy, cw, s, color) {
         t /= 15000;
 
         var a = cw * 0.29 - s * 0.5,
@@ -86,8 +128,7 @@ var Skycon;
             c = Math.cos(t * TWO_PI),
             p = c * TWO_PI / -16;
 
-        ctx.fillStyle = WHITE;
-        ctx.strokeStyle = BLACK;
+        ctx.strokeStyle = color;
         ctx.lineWidth = s;
         ctx.lineCap = "round";
 
@@ -97,10 +138,9 @@ var Skycon;
         ctx.arc(cx, cy, a, p + TWO_PI / 8, p + TWO_PI * 7 / 8, false);
         ctx.arc(cx + Math.cos(p) * a * TWO_OVER_SQRT_2, cy + Math.sin(p) * a * TWO_OVER_SQRT_2, a, p + TWO_PI * 5 / 8, p + TWO_PI * 3 / 8, true);
         ctx.closePath();
-        ctx.fill();
         ctx.stroke();
       },
-      rain = function(ctx, t, cx, cy, cw, s) {
+      rain = function(ctx, t, cx, cy, cw, s, color) {
         t /= 1000;
 
         var a = cw * 0.16,
@@ -108,7 +148,7 @@ var Skycon;
             c = TWO_PI *  7 / 12,
             i, p, x, y;
 
-        ctx.fillStyle = BLACK;
+        ctx.fillStyle = color;
 
         for(i = 4; i--; ) {
           p = (t + i / 4) % 1;
@@ -120,7 +160,7 @@ var Skycon;
           ctx.fill();
         }
       },
-      sleet = function(ctx, t, cx, cy, cw, s) {
+      sleet = function(ctx, t, cx, cy, cw, s, color) {
         t /= 750;
 
         var a = cw * 0.1875,
@@ -128,7 +168,7 @@ var Skycon;
             c = TWO_PI *  7 / 12,
             i, p, x, y;
 
-        ctx.strokeStyle = BLACK;
+        ctx.strokeStyle = color;
         ctx.lineWidth = s * 0.5;
         ctx.lineCap = "round";
 
@@ -139,7 +179,7 @@ var Skycon;
           line(ctx, x, y - s * 1.5, x, y + s * 1.5);
         }
       },
-      snow = function(ctx, t, cx, cy, cw, s) {
+      snow = function(ctx, t, cx, cy, cw, s, color) {
         t /= 3000;
 
         var a  = cw * 0.16,
@@ -155,7 +195,7 @@ var Skycon;
             wy = Math.sin(w) * b,
             i, p, x, y;
 
-        ctx.strokeStyle = BLACK;
+        ctx.strokeStyle = color;
         ctx.lineWidth = s * 0.5;
         ctx.lineCap = "round";
 
@@ -172,7 +212,7 @@ var Skycon;
       clamp = function(x) {
         return x < 0 ? 0 : x < 1 ? x : 1;
       },
-      swoosh = function(ctx, from, to, stroke, cx, cy, r, tail, up) {
+      swoosh = function(ctx, from, to, stroke, cx, cy, r, tail, up, color) {
         var a = stroke * 0.5,
             b = tail,
             c = r * TWO_PI * 5 / 8,
@@ -194,8 +234,8 @@ var Skycon;
           ea = TWO_PI *  3 / 8;
         }
 
-        ctx.fillStyle = BLACK;
-        ctx.strokeStyle = BLACK;
+        ctx.fillStyle = color;
+        ctx.strokeStyle = color;
         ctx.lineWidth = stroke;
         ctx.lineCap = "round";
 
@@ -258,7 +298,7 @@ var Skycon;
           ctx.stroke();
         }
       },
-      fogbank = function(ctx, t, cx, cy, cw, s) {
+      fogbank = function(ctx, t, cx, cy, cw, s, color) {
         t /= 30000;
 
         var a = cw * 0.21,
@@ -266,88 +306,91 @@ var Skycon;
             c = cw * 0.21,
             d = cw * 0.28;
 
-        ctx.fillStyle = BLACK;
+        ctx.fillStyle = color;
         puffs(ctx, t, cx, cy, a, b, c, d);
 
-        ctx.fillStyle = WHITE;
+        ctx.globalCompositeOperation = 'destination-out';
         puffs(ctx, t, cx, cy, a, b, c - s, d - s);
+        ctx.globalCompositeOperation = 'source-over';
       };
 
-  Skycon = function() {
+  Skycon = function(params) {
+    params = params || {}
     this.list     = [];
     this.interval = null;
+    this.color = params.color || "#000000"
   };
 
-  Skycon.CLEAR_DAY = function(ctx, t) {
+  Skycon.CLEAR_DAY = function(ctx, t, color) {
     var w = ctx.canvas.width,
         h = ctx.canvas.height,
         s = Math.min(w, h);
 
-    sun(ctx, t, w * 0.5, h * 0.5, s, s * STROKE);
+    sun(ctx, t, w * 0.5, h * 0.5, s, s * STROKE, color);
   };
 
-  Skycon.CLEAR_NIGHT = function(ctx, t) {
+  Skycon.CLEAR_NIGHT = function(ctx, t, color) {
     var w = ctx.canvas.width,
         h = ctx.canvas.height,
         s = Math.min(w, h);
 
-    moon(ctx, t, w * 0.5, h * 0.5, s, s * STROKE);
+    moon(ctx, t, w * 0.5, h * 0.5, s, s * STROKE, color);
   };
 
-  Skycon.PARTLY_CLOUDY_DAY = function(ctx, t) {
+  Skycon.PARTLY_CLOUDY_DAY = function(ctx, t, color) {
     var w = ctx.canvas.width,
         h = ctx.canvas.height,
         s = Math.min(w, h);
 
-    sun(ctx, t, w * 0.625, h * 0.375, s * 0.75, s * STROKE);
-    cloud(ctx, t, w * 0.375, h * 0.625, s * 0.75, s * STROKE);
+    sun(ctx, t, w * 0.625, h * 0.375, s * 0.75, s * STROKE, color);
+    cloud(ctx, t, w * 0.375, h * 0.625, s * 0.75, s * STROKE, color);
   };
 
-  Skycon.PARTLY_CLOUDY_NIGHT = function(ctx, t) {
+  Skycon.PARTLY_CLOUDY_NIGHT = function(ctx, t, color) {
     var w = ctx.canvas.width,
         h = ctx.canvas.height,
         s = Math.min(w, h);
 
-    moon(ctx, t, w * 0.667, h * 0.375, s * 0.75, s * STROKE);
-    cloud(ctx, t, w * 0.375, h * 0.625, s * 0.75, s * STROKE);
+    moon(ctx, t, w * 0.667, h * 0.375, s * 0.75, s * STROKE, color);
+    cloud(ctx, t, w * 0.375, h * 0.625, s * 0.75, s * STROKE, color);
   };
 
-  Skycon.CLOUDY = function(ctx, t) {
+  Skycon.CLOUDY = function(ctx, t, color) {
     var w = ctx.canvas.width,
         h = ctx.canvas.height,
         s = Math.min(w, h);
 
-    cloud(ctx, t, w * 0.5, h * 0.5, s, s * STROKE);
+    cloud(ctx, t, w * 0.5, h * 0.5, s, s * STROKE, color);
   };
 
-  Skycon.RAIN = function(ctx, t) {
+  Skycon.RAIN = function(ctx, t, color) {
     var w = ctx.canvas.width,
         h = ctx.canvas.height,
         s = Math.min(w, h);
 
-    rain(ctx, t, w * 0.5, h * 0.37, s * 0.9, s * STROKE);
-    cloud(ctx, t, w * 0.5, h * 0.37, s * 0.9, s * STROKE);
+    rain(ctx, t, w * 0.5, h * 0.37, s * 0.9, s * STROKE, color);
+    cloud(ctx, t, w * 0.5, h * 0.37, s * 0.9, s * STROKE, color);
   };
 
-  Skycon.SLEET = function(ctx, t) {
+  Skycon.SLEET = function(ctx, t, color) {
     var w = ctx.canvas.width,
         h = ctx.canvas.height,
         s = Math.min(w, h);
 
-    sleet(ctx, t, w * 0.5, h * 0.37, s * 0.9, s * STROKE);
-    cloud(ctx, t, w * 0.5, h * 0.37, s * 0.9, s * STROKE);
+    sleet(ctx, t, w * 0.5, h * 0.37, s * 0.9, s * STROKE, color);
+    cloud(ctx, t, w * 0.5, h * 0.37, s * 0.9, s * STROKE, color);
   };
 
-  Skycon.SNOW = function(ctx, t) {
+  Skycon.SNOW = function(ctx, t, color) {
     var w = ctx.canvas.width,
         h = ctx.canvas.height,
         s = Math.min(w, h);
 
-    snow(ctx, t, w * 0.5, h * 0.37, s * 0.9, s * STROKE);
-    cloud(ctx, t, w * 0.5, h * 0.37, s * 0.9, s * STROKE);
+    snow(ctx, t, w * 0.5, h * 0.37, s * 0.9, s * STROKE, color);
+    cloud(ctx, t, w * 0.5, h * 0.37, s * 0.9, s * STROKE, color);
   };
 
-  Skycon.WIND = function(ctx, t) {
+  Skycon.WIND = function(ctx, t, color) {
     t /= 500;
 
     var w = ctx.canvas.width,
@@ -358,19 +401,19 @@ var Skycon;
         s  = cw * STROKE,
         q  = t % 2;
 
-    swoosh(ctx, q - 1, q, s, cx, cy - s * 2, s * 1.5, cw * 0.5 - s * 0.5, true);
-    swoosh(ctx, q - 1, q, s, cx + cw * 0.25, cy + s * 2, s, cw * 0.5 - s * 0.5, false);
-    swoosh(ctx, q - 1, q, s, cx + cw * 0.5 - s * 1.5, cy - s * 1.5, s, cw * 0.25 - s * 1.5, true);
+    swoosh(ctx, q - 1, q, s, cx, cy - s * 2, s * 1.5, cw * 0.5 - s * 0.5, true, color);
+    swoosh(ctx, q - 1, q, s, cx + cw * 0.25, cy + s * 2, s, cw * 0.5 - s * 0.5, false, color);
+    swoosh(ctx, q - 1, q, s, cx + cw * 0.5 - s * 1.5, cy - s * 1.5, s, cw * 0.25 - s * 1.5, true, color);
 
   };
 
-  Skycon.FOG = function(ctx, t) {
+  Skycon.FOG = function(ctx, t, color) {
     var w = ctx.canvas.width,
         h = ctx.canvas.height,
         s = Math.min(w, h),
         k = s * STROKE;
 
-    fogbank(ctx, t, w * 0.5, h * 0.32, s * 0.75, k);
+    fogbank(ctx, t, w * 0.5, h * 0.32, s * 0.75, k, color);
 
     t /= 5000;
 
@@ -380,7 +423,7 @@ var Skycon;
         d = Math.cos((t + 0.75) * TWO_PI) * s * 0.02,
         n = h * 0.936;
 
-    ctx.strokeStyle = BLACK;
+    ctx.strokeStyle = color;
     ctx.lineWidth = k;
     ctx.lineCap = "round";
 
@@ -421,9 +464,8 @@ var Skycon;
         }
     },
     draw: function(obj, time) {
-      obj.ctx.fillStyle = WHITE;
-      obj.ctx.fillRect(0, 0, obj.ctx.canvas.width, obj.ctx.canvas.height);
-      obj.func(obj.ctx, time);
+      obj.ctx.clearRect(0, 0, obj.ctx.canvas.width, obj.ctx.canvas.height);
+      obj.func(obj.ctx, time, this.color);
     },
     play: function() {
       var self = this;
