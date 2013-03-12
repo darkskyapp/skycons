@@ -1,324 +1,247 @@
-var requestInterval, cancelInterval;
+var Skycon;
 
 (function(global) {
   "use strict";
 
-  var raf = global.requestAnimationFrame       ||
-            global.webkitRequestAnimationFrame ||
-            global.mozRequestAnimationFrame    ||
-            global.oRequestAnimationFrame      ||
-            global.msRequestAnimationFrame     ,
-      caf = global.cancelAnimationFrame        ||
-            global.webkitCancelAnimationFrame  ||
-            global.mozCancelAnimationFrame     ||
-            global.oCancelAnimationFrame       ||
-            global.msCancelAnimationFrame      ;
+  /* Set up a RequestAnimationFrame shim so we can animate efficiently FOR
+   * GREAT JUSTICE. */
+  var requestInterval, cancelInterval;
 
-  if(raf && caf) {
-    requestInterval = function(fn) {
-      var handle = {value: null, stop: false};
+  (function() {
+    var raf = global.requestAnimationFrame       ||
+              global.webkitRequestAnimationFrame ||
+              global.mozRequestAnimationFrame    ||
+              global.oRequestAnimationFrame      ||
+              global.msRequestAnimationFrame     ,
+        caf = global.cancelAnimationFrame        ||
+              global.webkitCancelAnimationFrame  ||
+              global.mozCancelAnimationFrame     ||
+              global.oCancelAnimationFrame       ||
+              global.msCancelAnimationFrame      ;
 
-      function loop() {
-        if(handle.stop)
-          return;
+    if(raf && caf) {
+      requestInterval = function(fn) {
+        var handle = {value: null, stop: false};
 
-        handle.value = raf(loop);
-        fn();
-      }
+        function loop() {
+          if(handle.stop)
+            return;
 
-      loop();
-      return handle;
-    };
+          handle.value = raf(loop);
+          fn();
+        }
 
-    cancelInterval = function(handle) {
-      handle.stop = true;
-      caf(handle.value);
-    };
-  }
+        loop();
+        return handle;
+      };
 
-  else {
-    requestInterval = setInterval;
-    cancelInterval = clearInterval;
-  }
-}(this));
+      cancelInterval = function(handle) {
+        handle.stop = true;
+        caf(handle.value);
+      };
+    }
 
+    else {
+      requestInterval = setInterval;
+      cancelInterval = clearInterval;
+    }
+  }());
 
-var Skycon;
-
-(function() {
-  "use strict";
-
+  /* Define skycon things. */
+  /* FIXME: I'm *really really* sorry that this code is so gross. Really, I am.
+   * I'll try to clean it up eventually! Promise! */
   var KEYFRAME = 500,
       STROKE = 0.08,
       TWO_PI = 2.0 * Math.PI,
-      TWO_OVER_SQRT_2 = 2.0 / Math.sqrt(2),
-      circle = function(ctx, x, y, r) {
-        ctx.beginPath();
-        ctx.arc(x, y, r, 0, TWO_PI, false);
-        ctx.fill();
-      },
-      line = function(ctx, ax, ay, bx, by) {
-        ctx.beginPath();
-        ctx.moveTo(ax, ay);
-        ctx.lineTo(bx, by);
-        ctx.stroke();
-      },
-      puff = function(ctx, t, cx, cy, rx, ry, rmin, rmax) {
-        var c = Math.cos(t * TWO_PI),
-            s = Math.sin(t * TWO_PI);
+      TWO_OVER_SQRT_2 = 2.0 / Math.sqrt(2);
 
-        rmax -= rmin;
+  function circle(ctx, x, y, r) {
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, TWO_PI, false);
+    ctx.fill();
+  }
 
-        circle(
-          ctx,
-          cx - s * rx,
-          cy + c * ry + rmax * 0.5,
-          rmin + (1 - c * 0.5) * rmax
-        );
-      },
-      puffs = function(ctx, t, cx, cy, rx, ry, rmin, rmax) {
-        var i;
+  function line(ctx, ax, ay, bx, by) {
+    ctx.beginPath();
+    ctx.moveTo(ax, ay);
+    ctx.lineTo(bx, by);
+    ctx.stroke();
+  }
 
-        for(i = 5; i--; )
-          puff(ctx, t + i / 5, cx, cy, rx, ry, rmin, rmax);
-      },
-      cloud = function(ctx, t, cx, cy, cw, s, color) {
-        t /= 30000;
+  function puff(ctx, t, cx, cy, rx, ry, rmin, rmax) {
+    var c = Math.cos(t * TWO_PI),
+        s = Math.sin(t * TWO_PI);
 
-        var a = cw * 0.21,
-            b = cw * 0.12,
-            c = cw * 0.24,
-            d = cw * 0.28;
+    rmax -= rmin;
 
-        ctx.fillStyle = color;
-        puffs(ctx, t, cx, cy, a, b, c, d);
+    circle(
+      ctx,
+      cx - s * rx,
+      cy + c * ry + rmax * 0.5,
+      rmin + (1 - c * 0.5) * rmax
+    );
+  }
 
-        ctx.globalCompositeOperation = 'destination-out';
-        puffs(ctx, t, cx, cy, a, b, c - s, d - s);
-        ctx.globalCompositeOperation = 'source-over';
-      },
-      sun = function(ctx, t, cx, cy, cw, s, color) {
-        t /= 120000;
+  function puffs(ctx, t, cx, cy, rx, ry, rmin, rmax) {
+    var i;
 
-        var a = cw * 0.25 - s * 0.5,
-            b = cw * 0.32 + s * 0.5,
-            c = cw * 0.50 - s * 0.5,
-            i, p, cos, sin;
+    for(i = 5; i--; )
+      puff(ctx, t + i / 5, cx, cy, rx, ry, rmin, rmax);
+  }
 
-        ctx.strokeStyle = color;
-        ctx.lineWidth = s;
-        ctx.lineCap = "round";
+  function cloud(ctx, t, cx, cy, cw, s, color) {
+    t /= 30000;
 
-        ctx.beginPath();
-        ctx.arc(cx, cy, a, 0, TWO_PI, false);
-        ctx.stroke();
+    var a = cw * 0.21,
+        b = cw * 0.12,
+        c = cw * 0.24,
+        d = cw * 0.28;
 
-        for(i = 8; i--; ) {
-          p = (t + i / 8) * TWO_PI;
-          cos = Math.cos(p);
-          sin = Math.sin(p);
-          line(ctx, cx + cos * b, cy + sin * b, cx + cos * c, cy + sin * c);
-        }
-      },
-      moon = function(ctx, t, cx, cy, cw, s, color) {
-        t /= 15000;
+    ctx.fillStyle = color;
+    puffs(ctx, t, cx, cy, a, b, c, d);
 
-        var a = cw * 0.29 - s * 0.5,
-            b = cw * 0.05,
-            c = Math.cos(t * TWO_PI),
-            p = c * TWO_PI / -16;
+    ctx.globalCompositeOperation = 'destination-out';
+    puffs(ctx, t, cx, cy, a, b, c - s, d - s);
+    ctx.globalCompositeOperation = 'source-over';
+  }
 
-        ctx.strokeStyle = color;
-        ctx.lineWidth = s;
-        ctx.lineCap = "round";
+  function sun(ctx, t, cx, cy, cw, s, color) {
+    t /= 120000;
 
-        cx += c * b;
+    var a = cw * 0.25 - s * 0.5,
+        b = cw * 0.32 + s * 0.5,
+        c = cw * 0.50 - s * 0.5,
+        i, p, cos, sin;
 
-        ctx.beginPath();
-        ctx.arc(cx, cy, a, p + TWO_PI / 8, p + TWO_PI * 7 / 8, false);
-        ctx.arc(cx + Math.cos(p) * a * TWO_OVER_SQRT_2, cy + Math.sin(p) * a * TWO_OVER_SQRT_2, a, p + TWO_PI * 5 / 8, p + TWO_PI * 3 / 8, true);
-        ctx.closePath();
-        ctx.stroke();
-      },
-      rain = function(ctx, t, cx, cy, cw, s, color) {
-        t /= 1000;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = s;
+    ctx.lineCap = "round";
 
-        var a = cw * 0.16,
-            b = TWO_PI * 11 / 12,
-            c = TWO_PI *  7 / 12,
-            i, p, x, y;
+    ctx.beginPath();
+    ctx.arc(cx, cy, a, 0, TWO_PI, false);
+    ctx.stroke();
 
-        ctx.fillStyle = color;
+    for(i = 8; i--; ) {
+      p = (t + i / 8) * TWO_PI;
+      cos = Math.cos(p);
+      sin = Math.sin(p);
+      line(ctx, cx + cos * b, cy + sin * b, cx + cos * c, cy + sin * c);
+    }
+  }
 
-        for(i = 4; i--; ) {
-          p = (t + i / 4) % 1;
-          x = cx + ((i - 1.5) / 1.5) * (i === 1 || i === 2 ? -1 : 1) * a;
-          y = cy + p * p * cw;
-          ctx.beginPath();
-          ctx.moveTo(x, y - s * 1.5);
-          ctx.arc(x, y, s * 0.75, b, c, false);
-          ctx.fill();
-        }
-      },
-      sleet = function(ctx, t, cx, cy, cw, s, color) {
-        t /= 750;
+  function moon(ctx, t, cx, cy, cw, s, color) {
+    t /= 15000;
 
-        var a = cw * 0.1875,
-            b = TWO_PI * 11 / 12,
-            c = TWO_PI *  7 / 12,
-            i, p, x, y;
+    var a = cw * 0.29 - s * 0.5,
+        b = cw * 0.05,
+        c = Math.cos(t * TWO_PI),
+        p = c * TWO_PI / -16;
 
-        ctx.strokeStyle = color;
-        ctx.lineWidth = s * 0.5;
-        ctx.lineCap = "round";
+    ctx.strokeStyle = color;
+    ctx.lineWidth = s;
+    ctx.lineCap = "round";
 
-        for(i = 4; i--; ) {
-          p = (t + i / 4) % 1;
-          x = Math.floor(cx + ((i - 1.5) / 1.5) * (i === 1 || i === 2 ? -1 : 1) * a) + 0.5;
-          y = cy + p * cw;
-          line(ctx, x, y - s * 1.5, x, y + s * 1.5);
-        }
-      },
-      snow = function(ctx, t, cx, cy, cw, s, color) {
-        t /= 3000;
+    cx += c * b;
 
-        var a  = cw * 0.16,
-            b  = s * 0.75,
-            u  = t * TWO_PI * 0.7,
-            ux = Math.cos(u) * b,
-            uy = Math.sin(u) * b,
-            v  = u + TWO_PI / 3,
-            vx = Math.cos(v) * b,
-            vy = Math.sin(v) * b,
-            w  = u + TWO_PI * 2 / 3,
-            wx = Math.cos(w) * b,
-            wy = Math.sin(w) * b,
-            i, p, x, y;
+    ctx.beginPath();
+    ctx.arc(cx, cy, a, p + TWO_PI / 8, p + TWO_PI * 7 / 8, false);
+    ctx.arc(cx + Math.cos(p) * a * TWO_OVER_SQRT_2, cy + Math.sin(p) * a * TWO_OVER_SQRT_2, a, p + TWO_PI * 5 / 8, p + TWO_PI * 3 / 8, true);
+    ctx.closePath();
+    ctx.stroke();
+  }
 
-        ctx.strokeStyle = color;
-        ctx.lineWidth = s * 0.5;
-        ctx.lineCap = "round";
+  function rain(ctx, t, cx, cy, cw, s, color) {
+    t /= 1000;
 
-        for(i = 4; i--; ) {
-          p = (t + i / 4) % 1;
-          x = cx + Math.sin((p + i / 4) * TWO_PI) * a;
-          y = cy + p * cw;
+    var a = cw * 0.16,
+        b = TWO_PI * 11 / 12,
+        c = TWO_PI *  7 / 12,
+        i, p, x, y;
 
-          line(ctx, x - ux, y - uy, x + ux, y + uy);
-          line(ctx, x - vx, y - vy, x + vx, y + vy);
-          line(ctx, x - wx, y - wy, x + wx, y + wy);
-        }
-      },
-      clamp = function(x) {
-        return x < 0 ? 0 : x < 1 ? x : 1;
-      },
-      swoosh = function(ctx, from, to, stroke, cx, cy, r, tail, up, color) {
-        var a = stroke * 0.5,
-            b = tail,
-            c = r * TWO_PI * 5 / 8,
-            d = 1 / (a + a + b + c),
-            e = a * d,
-            f = (a + b) * d,
-            g = (a + b + c) * d,
-            ty, sa, ea, t;
+    ctx.fillStyle = color;
 
-        if(up) {
-          ty = cy + r;
-          sa = TWO_PI *  2 / 8;
-          ea = TWO_PI * -3 / 8;
-        }
+    for(i = 4; i--; ) {
+      p = (t + i / 4) % 1;
+      x = cx + ((i - 1.5) / 1.5) * (i === 1 || i === 2 ? -1 : 1) * a;
+      y = cy + p * p * cw;
+      ctx.beginPath();
+      ctx.moveTo(x, y - s * 1.5);
+      ctx.arc(x, y, s * 0.75, b, c, false);
+      ctx.fill();
+    }
+  }
 
-        else {
-          ty = cy - r;
-          sa = TWO_PI * -2 / 8;
-          ea = TWO_PI *  3 / 8;
-        }
+  function sleet(ctx, t, cx, cy, cw, s, color) {
+    t /= 750;
 
-        ctx.fillStyle = color;
-        ctx.strokeStyle = color;
-        ctx.lineWidth = stroke;
-        ctx.lineCap = "round";
+    var a = cw * 0.1875,
+        b = TWO_PI * 11 / 12,
+        c = TWO_PI *  7 / 12,
+        i, p, x, y;
 
-        ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = s * 0.5;
+    ctx.lineCap = "round";
 
-        if(to < e) {
-          ctx.arc(
-            cx - tail,
-            ty,
-            clamp(to / e) * stroke * 0.5,
-            0,
-            TWO_PI,
-            false
-          );
+    for(i = 4; i--; ) {
+      p = (t + i / 4) % 1;
+      x = Math.floor(cx + ((i - 1.5) / 1.5) * (i === 1 || i === 2 ? -1 : 1) * a) + 0.5;
+      y = cy + p * cw;
+      line(ctx, x, y - s * 1.5, x, y + s * 1.5);
+    }
+  }
 
-          ctx.fill();
-        }
+  function snow(ctx, t, cx, cy, cw, s, color) {
+    t /= 3000;
 
-        else if(from > g) {
-          ctx.arc(
-            cx + Math.cos(ea) * r,
-            cy + Math.sin(ea) * r,
-            clamp(1 - (from - g) / (1 - g)) * stroke * 0.5,
-            TWO_PI,
-            false
-          );
+    var a  = cw * 0.16,
+        b  = s * 0.75,
+        u  = t * TWO_PI * 0.7,
+        ux = Math.cos(u) * b,
+        uy = Math.sin(u) * b,
+        v  = u + TWO_PI / 3,
+        vx = Math.cos(v) * b,
+        vy = Math.sin(v) * b,
+        w  = u + TWO_PI * 2 / 3,
+        wx = Math.cos(w) * b,
+        wy = Math.sin(w) * b,
+        i, p, x, y;
 
-          ctx.fill();
-        }
+    ctx.strokeStyle = color;
+    ctx.lineWidth = s * 0.5;
+    ctx.lineCap = "round";
 
-        else if(from < f) {
-          ctx.moveTo(cx - tail * clamp(1 - from / f), ty);
+    for(i = 4; i--; ) {
+      p = (t + i / 4) % 1;
+      x = cx + Math.sin((p + i / 4) * TWO_PI) * a;
+      y = cy + p * cw;
 
-          if(to < f)
-            ctx.lineTo(cx - tail * clamp(1 - to / f), ty);
+      line(ctx, x - ux, y - uy, x + ux, y + uy);
+      line(ctx, x - vx, y - vy, x + vx, y + vy);
+      line(ctx, x - wx, y - wy, x + wx, y + wy);
+    }
+  }
 
-          else
-            ctx.arc(
-              cx,
-              cy,
-              r,
-              sa,
-              ea + (sa - ea) * clamp(1 - (to - f) / (1 - f)),
-              up
-            );
+  function fogbank(ctx, t, cx, cy, cw, s, color) {
+    t /= 30000;
 
-          ctx.stroke();
-        }
+    var a = cw * 0.21,
+        b = cw * 0.06,
+        c = cw * 0.21,
+        d = cw * 0.28;
 
-        else {
-          ctx.arc(
-            cx,
-            cy,
-            r,
-            ea + (sa - ea) * clamp(1 - (from - f) / (1 - f)),
-            ea + (sa - ea) * clamp(1 - (to   - f) / (1 - f)),
-            up
-          );
+    ctx.fillStyle = color;
+    puffs(ctx, t, cx, cy, a, b, c, d);
 
-          ctx.stroke();
-        }
-      },
-      fogbank = function(ctx, t, cx, cy, cw, s, color) {
-        t /= 30000;
+    ctx.globalCompositeOperation = 'destination-out';
+    puffs(ctx, t, cx, cy, a, b, c - s, d - s);
+    ctx.globalCompositeOperation = 'source-over';
+  }
 
-        var a = cw * 0.21,
-            b = cw * 0.06,
-            c = cw * 0.21,
-            d = cw * 0.28;
-
-        ctx.fillStyle = color;
-        puffs(ctx, t, cx, cy, a, b, c, d);
-
-        ctx.globalCompositeOperation = 'destination-out';
-        puffs(ctx, t, cx, cy, a, b, c - s, d - s);
-        ctx.globalCompositeOperation = 'source-over';
-      };
-
-  Skycon = function(params) {
-    params = params || {}
+  Skycon = function(opts) {
     this.list     = [];
     this.interval = null;
-    this.color = params.color || "#000000"
+    this.color    = opts && opts.color ? opts.color : "black";
   };
 
   Skycon.CLEAR_DAY = function(ctx, t, color) {
@@ -391,20 +314,6 @@ var Skycon;
   };
 
   Skycon.WIND = function(ctx, t, color) {
-    t /= 500;
-
-    var w = ctx.canvas.width,
-        h = ctx.canvas.height,
-        cx = w * 0.5,
-        cy = h * 0.5,
-        cw = Math.min(w, h),
-        s  = cw * STROKE,
-        q  = t % 2;
-
-    swoosh(ctx, q - 1, q, s, cx, cy - s * 2, s * 1.5, cw * 0.5 - s * 0.5, true, color);
-    swoosh(ctx, q - 1, q, s, cx + cw * 0.25, cy + s * 2, s, cw * 0.5 - s * 0.5, false, color);
-    swoosh(ctx, q - 1, q, s, cx + cw * 0.5 - s * 1.5, cy - s * 1.5, s, cw * 0.25 - s * 1.5, true, color);
-
   };
 
   Skycon.FOG = function(ctx, t, color) {
@@ -491,4 +400,4 @@ var Skycon;
       }
     }
   };
-}());
+}(this));
