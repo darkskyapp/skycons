@@ -402,7 +402,7 @@ var Skycons;
   function swoosh(ctx, t, cx, cy, cw, s, color) {
     t /= 4000;
 
-    var start = ((t - 0.31) % 1) * (WIND_PATH.length / 2 - 1),
+    var start = ((t - 0.36) % 1) * (WIND_PATH.length / 2 - 1),
         end   = ((t - 0.11) % 1) * (WIND_PATH.length / 2 - 1),
         i, a, b, c, d, x, y;
 
