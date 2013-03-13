@@ -1,4 +1,4 @@
-var Skycon;
+var Skycons;
 
 (function(global) {
   "use strict";
@@ -458,13 +458,13 @@ var Skycon;
     leaf(ctx, t, x, y, cw, s, color);
   }
 
-  Skycon = function(opts) {
+  Skycons = function(opts) {
     this.list     = [];
     this.interval = null;
     this.color    = opts && opts.color ? opts.color : "black";
   };
 
-  Skycon.CLEAR_DAY = function(ctx, t, color) {
+  Skycons.CLEAR_DAY = function(ctx, t, color) {
     var w = ctx.canvas.width,
         h = ctx.canvas.height,
         s = Math.min(w, h);
@@ -472,7 +472,7 @@ var Skycon;
     sun(ctx, t, w * 0.5, h * 0.5, s, s * STROKE, color);
   };
 
-  Skycon.CLEAR_NIGHT = function(ctx, t, color) {
+  Skycons.CLEAR_NIGHT = function(ctx, t, color) {
     var w = ctx.canvas.width,
         h = ctx.canvas.height,
         s = Math.min(w, h);
@@ -480,7 +480,7 @@ var Skycon;
     moon(ctx, t, w * 0.5, h * 0.5, s, s * STROKE, color);
   };
 
-  Skycon.PARTLY_CLOUDY_DAY = function(ctx, t, color) {
+  Skycons.PARTLY_CLOUDY_DAY = function(ctx, t, color) {
     var w = ctx.canvas.width,
         h = ctx.canvas.height,
         s = Math.min(w, h);
@@ -489,7 +489,7 @@ var Skycon;
     cloud(ctx, t, w * 0.375, h * 0.625, s * 0.75, s * STROKE, color);
   };
 
-  Skycon.PARTLY_CLOUDY_NIGHT = function(ctx, t, color) {
+  Skycons.PARTLY_CLOUDY_NIGHT = function(ctx, t, color) {
     var w = ctx.canvas.width,
         h = ctx.canvas.height,
         s = Math.min(w, h);
@@ -498,7 +498,7 @@ var Skycon;
     cloud(ctx, t, w * 0.375, h * 0.625, s * 0.75, s * STROKE, color);
   };
 
-  Skycon.CLOUDY = function(ctx, t, color) {
+  Skycons.CLOUDY = function(ctx, t, color) {
     var w = ctx.canvas.width,
         h = ctx.canvas.height,
         s = Math.min(w, h);
@@ -506,7 +506,7 @@ var Skycon;
     cloud(ctx, t, w * 0.5, h * 0.5, s, s * STROKE, color);
   };
 
-  Skycon.RAIN = function(ctx, t, color) {
+  Skycons.RAIN = function(ctx, t, color) {
     var w = ctx.canvas.width,
         h = ctx.canvas.height,
         s = Math.min(w, h);
@@ -515,7 +515,7 @@ var Skycon;
     cloud(ctx, t, w * 0.5, h * 0.37, s * 0.9, s * STROKE, color);
   };
 
-  Skycon.SLEET = function(ctx, t, color) {
+  Skycons.SLEET = function(ctx, t, color) {
     var w = ctx.canvas.width,
         h = ctx.canvas.height,
         s = Math.min(w, h);
@@ -524,7 +524,7 @@ var Skycon;
     cloud(ctx, t, w * 0.5, h * 0.37, s * 0.9, s * STROKE, color);
   };
 
-  Skycon.SNOW = function(ctx, t, color) {
+  Skycons.SNOW = function(ctx, t, color) {
     var w = ctx.canvas.width,
         h = ctx.canvas.height,
         s = Math.min(w, h);
@@ -533,7 +533,7 @@ var Skycon;
     cloud(ctx, t, w * 0.5, h * 0.37, s * 0.9, s * STROKE, color);
   };
 
-  Skycon.WIND = function(ctx, t, color) {
+  Skycons.WIND = function(ctx, t, color) {
     var w = ctx.canvas.width,
         h = ctx.canvas.height,
         s = Math.min(w, h);
@@ -542,7 +542,7 @@ var Skycon;
     //leaf(ctx, t, w * 0.5, h * 0.5, s, s * STROKE, color);
   };
 
-  Skycon.FOG = function(ctx, t, color) {
+  Skycons.FOG = function(ctx, t, color) {
     var w = ctx.canvas.width,
         h = ctx.canvas.height,
         s = Math.min(w, h),
@@ -566,7 +566,7 @@ var Skycon;
     line(ctx, c + w * 0.2 + k * 0.5, n - k * 2.5, d + w * 0.8 - k * 0.5, n - k * 2.5);
   };
 
-  Skycon.prototype = {
+  Skycons.prototype = {
     add: function(id, draw) {
       var obj = {
             id: id,
