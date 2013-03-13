@@ -401,19 +401,60 @@ var Skycon;
       ];
 
   function swoosh(ctx, t, cx, cy, cw, s, color) {
-    t /= 6000;
+    t /= 3000;
 
-    var i, x, y;
+    var start = ((t - 0.3) % 1) * (WIND_PATH.length / 2 - 1),
+        end   = ((t - 0.1) % 1) * (WIND_PATH.length / 2 - 1),
+        i, a, b, c, d, x, y;
 
     ctx.strokeStyle = color;
     ctx.lineWidth = s;
     ctx.lineCap = "round";
 
     ctx.beginPath();
-    ctx.moveTo(cx + WIND_PATH[0] * cw, cy + WIND_PATH[1] * cw);
-    for(i = 2; i !== WIND_PATH.length; i += 2)
-      ctx.lineTo(cx + WIND_PATH[i] * cw, cy + WIND_PATH[i + 1] * cw);
+
+    b  = Math.floor(start);
+    a  = start - b;
+    b *= 2;
+    d  = Math.floor(end);
+    c  = end - d;
+    d *= 2;
+
+    x  = cx + (WIND_PATH[b + 0] * (1 - a) + WIND_PATH[b + 2] * a) * cw;
+    y  = cy + (WIND_PATH[b + 1] * (1 - a) + WIND_PATH[b + 3] * a) * cw;
+    ctx.moveTo(x, y);
+
+    if(b < d)
+      for(i = b; i !== d; i += 2)
+        ctx.lineTo(cx + WIND_PATH[i + 2] * cw, cy + WIND_PATH[i + 3] * cw);
+
+    else {
+      for(i = b + 2; i !== WIND_PATH.length; i += 2)
+        ctx.lineTo(cx + WIND_PATH[i] * cw, cy + WIND_PATH[i + 1] * cw);
+
+      ctx.moveTo(cx + WIND_PATH[0] * cw, cy + WIND_PATH[1] * cw); 
+
+      for(i = 0; i !== d; i += 2)
+        ctx.lineTo(cx + WIND_PATH[i + 2] * cw, cy + WIND_PATH[i + 3] * cw);
+    }
+
+    x  = cx + (WIND_PATH[d + 0] * (1 - c) + WIND_PATH[d + 2] * c) * cw;
+    y  = cy + (WIND_PATH[d + 1] * (1 - c) + WIND_PATH[d + 3] * c) * cw;
+    ctx.lineTo(x, y);
+
     ctx.stroke();
+
+    var m = (t % 1) * (WIND_PATH.length / 2 - 1),
+        n = Math.floor(m);
+
+    m -= n;
+    n *= 2;
+
+    x = WIND_PATH[n + 0] * (1 - m) + WIND_PATH[n + 2] * m;
+    y = WIND_PATH[n + 1] * (1 - m) + WIND_PATH[n + 3] * m;
+
+    ctx.fillStyle = "red";
+    circle(ctx, cx + x * cw, cy + y * cw, s);
   }
 
   function leaf(ctx, t, cx, cy, cw, s, color) {
