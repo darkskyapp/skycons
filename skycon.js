@@ -403,8 +403,8 @@ var Skycon;
   function swoosh(ctx, t, cx, cy, cw, s, color) {
     t /= 3000;
 
-    var start = ((t - 0.3) % 1) * (WIND_PATH.length / 2 - 1),
-        end   = ((t - 0.1) % 1) * (WIND_PATH.length / 2 - 1),
+    var start = ((t - 0.37) % 1) * (WIND_PATH.length / 2 - 1),
+        end   = ((t - 0.17) % 1) * (WIND_PATH.length / 2 - 1),
         i, a, b, c, d, x, y;
 
     ctx.strokeStyle = color;
@@ -450,20 +450,20 @@ var Skycon;
     m -= n;
     n *= 2;
 
-    x = WIND_PATH[n + 0] * (1 - m) + WIND_PATH[n + 2] * m;
-    y = WIND_PATH[n + 1] * (1 - m) + WIND_PATH[n + 3] * m;
+    x = cx + (WIND_PATH[n + 0] * (1 - m) + WIND_PATH[n + 2] * m) * cw;
+    y = cy + (WIND_PATH[n + 1] * (1 - m) + WIND_PATH[n + 3] * m) * cw;
 
     ctx.fillStyle = "red";
     circle(ctx, cx + x * cw, cy + y * cw, s);
+
+    leaf(ctx, t, x, y, cw, s, color);
   }
 
-  function leaf(ctx, t, cx, cy, cw, s, color) {
-    var x = cx + evaluate(sx, remap(sl, (t / 4000) % 1)) * cw,
-        y = cy + evaluate(sy, remap(sl, (t / 4000) % 1)) * cw,
-        a = cw / 6,
+  function leaf(ctx, t, x, y, cw, s, color) {
+    var a = cw / 6,
         b = a / 3,
         c = 2 * b,
-        d = ((t / 4000) % 1) * TWO_PI,
+        d = (t % 1) * TWO_PI,
         e = Math.cos(d),
         f = Math.sin(d);
 
