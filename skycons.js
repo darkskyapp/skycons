@@ -556,14 +556,16 @@ var Skycons;
         b = Math.cos((t + 0.25) * TWO_PI) * s * 0.02,
         c = Math.cos((t + 0.50) * TWO_PI) * s * 0.02,
         d = Math.cos((t + 0.75) * TWO_PI) * s * 0.02,
-        n = h * 0.936;
+        n = h * 0.936,
+        e = Math.floor(n - k * 0.5) + 0.5,
+        f = Math.floor(n - k * 2.5) + 0.5;
 
     ctx.strokeStyle = color;
     ctx.lineWidth = k;
     ctx.lineCap = "round";
 
-    line(ctx, a + w * 0.2 + k * 0.5, n - k * 0.5, b + w * 0.8 - k * 0.5, n - k * 0.5);
-    line(ctx, c + w * 0.2 + k * 0.5, n - k * 2.5, d + w * 0.8 - k * 0.5, n - k * 2.5);
+    line(ctx, a + w * 0.2 + k * 0.5, e, b + w * 0.8 - k * 0.5, e);
+    line(ctx, c + w * 0.2 + k * 0.5, f, d + w * 0.8 - k * 0.5, f);
   };
 
   Skycons.prototype = {

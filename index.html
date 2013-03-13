@@ -2,44 +2,136 @@
 <html>
   <head>
     <title>Skycons</title>
+    <meta charset="us-ascii">
 
     <style type="text/css">
+      body {
+        font: 300 112.5%/1.5em "Helvetica", "Arial", sans-serif;
+        margin: 3em;
+        padding: 0;
+      }
+
+      article {
+        margin: auto;
+        width: 30em;
+      }
+
+      header {
+        text-align: center;
+        margin: 3em 0;
+      }
+
+      h1 {
+        font-size: 3em;
+        line-height: 1em;
+        margin: 0.5em 0;
+      }
+
+      p {
+        margin: 1.5em 0;
+      }
+
+      header * {
+        margin: 0;
+      }
+
+      figure {
+        margin: 3em auto;
+        width: 368px;
+        height: 152px;
+      }
+
       canvas {
-        border: 1px solid navy;
+        display: block;
+        float: left;
+        margin-left: 8px;
+        margin-top: 8px;
+      }
+
+      pre {
+        font: 77.8%/1.5em "Lucida Sans Typewriter", "Lucida Console", "Monaco", "Bitstream Vera Sans Mono", monospace;
+        margin: 3.375em 1.6875em;
+      }
+
+      a {
+        color: royalblue;
+        text-decoration: none;
+      }
+
+      a:visited {
+        color: indianred;
+      }
+
+      a:hover {
+        text-decoration: underline;
       }
     </style>
   </head>
 
   <body>
-    <canvas id="clear-day" width="64" height="64">
-    </canvas>
+    <article>
+      <header>
+        <h1>Skycons</h1>
+        <p>Happy animated weather icons for the web!</p>
+      </header>
 
-    <canvas id="clear-night" width="64" height="64">
-    </canvas>
+      <p>Skycons is a set of ten weather glyphs, procedurally generated and
+      animated by JavaScript in HTML5 canvases.</p>
 
-    <canvas id="partly-cloudy-day" width="64" height="64">
-    </canvas>
+      <figure class="icons">
+        <canvas id="clear-day" width="64" height="64">
+        </canvas>
 
-    <canvas id="partly-cloudy-night" width="64" height="64">
-    </canvas>
+        <canvas id="clear-night" width="64" height="64">
+        </canvas>
 
-    <canvas id="cloudy" width="64" height="64">
-    </canvas>
+        <canvas id="partly-cloudy-day" width="64" height="64">
+        </canvas>
 
-    <canvas id="rain" width="64" height="64">
-    </canvas>
+        <canvas id="partly-cloudy-night" width="64" height="64">
+        </canvas>
 
-    <canvas id="sleet" width="64" height="64">
-    </canvas>
+        <canvas id="cloudy" width="64" height="64">
+        </canvas>
 
-    <canvas id="snow" width="64" height="64">
-    </canvas>
+        <canvas id="rain" width="64" height="64">
+        </canvas>
 
-    <canvas id="wind" width="64" height="64">
-    </canvas>
+        <canvas id="sleet" width="64" height="64">
+        </canvas>
 
-    <canvas id="fog" width="64" height="64">
-    </canvas>
+        <canvas id="snow" width="64" height="64">
+        </canvas>
+
+        <canvas id="wind" width="64" height="64">
+        </canvas>
+
+        <canvas id="fog" width="64" height="64">
+        </canvas>
+      </figure>
+
+      <p>They&rsquo;re easy to use, and pretty lightweight, so they
+      shouldn&rsquo;t rain on your parade:</p>
+
+      <pre>&lt;canvas id="icon1" width="128" height="128"&gt;&lt;/canvas&gt;
+&lt;canvas id="icon2" width="128" height="128"&gt;&lt;/canvas&gt;
+
+&lt;script&gt;
+  var skycons = new Skycons();
+  skycons.add("icon1", Skycons.PARTLY_CLOUDY_DAY);
+  skycons.add("icon2", Skycons.RAIN);
+  skycons.play();
+  // you can also halt animation with skycons.pause()
+&lt;/script&gt;</pre>
+
+      <p>Skycons were designed by those wacky fellas at <strong>The Dark Sky
+      Company</strong>, and were heavily inspired by Adam Whitcroft&rsquo;s
+      excellent <a href="http://adamwhitcroft.com/climacons/">Climacons</a>.
+      The source code is available on
+      <a href="http://github.com/darkskyapp/skycons">Github</a>. They are
+      released into the public domain, so please do with them as you see fit!
+      &#9825;</p>
+    </article>
 
     <script src="skycons.js"></script>
 
