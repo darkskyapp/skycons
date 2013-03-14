@@ -24,9 +24,6 @@ var Skycons;
         var handle = {value: null, stop: false};
 
         function loop() {
-          if(handle.stop)
-            return;
-
           handle.value = raf(loop);
           fn();
         }
@@ -36,7 +33,6 @@ var Skycons;
       };
 
       cancelInterval = function(handle) {
-        handle.stop = true;
         caf(handle.value);
       };
     }
@@ -635,9 +631,6 @@ var Skycons;
       if(this.interval) {
         cancelInterval(this.interval);
         this.interval = null;
-
-        for(i = this.list.length; i--; )
-          this.draw(this.list[i], KEYFRAME);
       }
     }
   };
