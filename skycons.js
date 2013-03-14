@@ -21,19 +21,11 @@ var Skycons;
 
     if(raf && caf) {
       requestInterval = function(fn, delay) {
-        var handle = {value: null},
-            prev   = Date.now();
+        var handle = {value: null};
 
         function loop() {
-          var curr;
-
           handle.value = raf(loop);
-
-          curr = Date.now();
-          if(curr - prev >= delay) {
-            fn();
-            prev = curr;
-          }
+          fn();
         }
 
         loop();
