@@ -428,7 +428,7 @@ var Skycons;
   }
 
   function swoosh(ctx, t, cx, cy, cw, s, index, total, color) {
-    t /= 4000;
+    t /= 2500;
 
     var path = WIND_PATHS[index],
         a = (t + index - WIND_OFFSETS[index].start) % total,
