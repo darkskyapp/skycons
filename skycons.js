@@ -20,12 +20,20 @@ var Skycons;
               global.msCancelAnimationFrame      ;
 
     if(raf && caf) {
-      requestInterval = function(fn) {
-        var handle = {value: null, stop: false};
+      requestInterval = function(fn, delay) {
+        var handle = {value: null},
+            prev   = Date.now();
 
         function loop() {
+          var curr;
+
           handle.value = raf(loop);
-          fn();
+
+          curr = Date.now();
+          if(curr - prev >= delay) {
+            fn();
+            prev = curr;
+          }
         }
 
         loop();
@@ -329,47 +337,79 @@ var Skycons;
   }
 
   /*
-  var WIND_PATH = downsample(63, upsample(8, [
-        -1.00, -0.28,
-        -0.75, -0.18,
-        -0.50,  0.12,
-        -0.20,  0.12,
-        -0.04, -0.04,
-        -0.07, -0.18,
-        -0.19, -0.18,
-        -0.23, -0.05,
-        -0.12,  0.11,
-         0.02,  0.16,
-         0.20,  0.15,
-         0.50,  0.07,
-         0.75,  0.18,
-         1.00,  0.28
-      ]));
+  var WIND_PATHS = [
+        downsample(63, upsample(8, [
+          -1.00, -0.28,
+          -0.75, -0.18,
+          -0.50,  0.12,
+          -0.20,  0.12,
+          -0.04, -0.04,
+          -0.07, -0.18,
+          -0.19, -0.18,
+          -0.23, -0.05,
+          -0.12,  0.11,
+           0.02,  0.16,
+           0.20,  0.15,
+           0.50,  0.07,
+           0.75,  0.18,
+           1.00,  0.28
+        ])),
+        downsample(31, upsample(16, [
+          -1.00, -0.10,
+          -0.75,  0.00,
+          -0.50,  0.10,
+          -0.25,  0.14,
+           0.00,  0.10,
+           0.25,  0.00,
+           0.50, -0.10,
+           0.75, -0.14,
+           1.00, -0.10
+        ]))
+      ];
   */
 
-  var WIND_PATH = [
-        -0.7500, -0.1800, -0.7219, -0.1527, -0.6971, -0.1225,
-        -0.6739, -0.0910, -0.6516, -0.0588, -0.6298, -0.0262,
-        -0.6083,  0.0065, -0.5868,  0.0396, -0.5643,  0.0731,
-        -0.5372,  0.1041, -0.5033,  0.1259, -0.4662,  0.1406,
-        -0.4275,  0.1493, -0.3881,  0.1530, -0.3487,  0.1526,
-        -0.3095,  0.1488, -0.2708,  0.1421, -0.2319,  0.1342,
-        -0.1943,  0.1217, -0.1600,  0.1025, -0.1290,  0.0785,
-        -0.1012,  0.0509, -0.0764,  0.0206, -0.0547, -0.0120,
-        -0.0378, -0.0472, -0.0324, -0.0857, -0.0389, -0.1241,
-        -0.0546, -0.1599, -0.0814, -0.1876, -0.1193, -0.1964,
-        -0.1582, -0.1935, -0.1931, -0.1769, -0.2157, -0.1453,
-        -0.2290, -0.1085, -0.2327, -0.0697, -0.2240, -0.0317,
-        -0.2064,  0.0033, -0.1853,  0.0362, -0.1613,  0.0672,
-        -0.1350,  0.0961, -0.1051,  0.1213, -0.0706,  0.1397,
-        -0.0332,  0.1512,  0.0053,  0.1580,  0.0442,  0.1624,
-         0.0833,  0.1636,  0.1224,  0.1615,  0.1613,  0.1565,
-         0.1999,  0.1500,  0.2378,  0.1402,  0.2749,  0.1279,
-         0.3118,  0.1147,  0.3487,  0.1015,  0.3858,  0.0892,
-         0.4236,  0.0787,  0.4621,  0.0715,  0.5012,  0.0702,
-         0.5398,  0.0766,  0.5768,  0.0890,  0.6123,  0.1055,
-         0.6466,  0.1244,  0.6805,  0.1440,  0.7147,  0.1630,
-         0.7500,  0.1800
+  var WIND_PATHS = [
+        [
+          -0.7500, -0.1800, -0.7219, -0.1527, -0.6971, -0.1225,
+          -0.6739, -0.0910, -0.6516, -0.0588, -0.6298, -0.0262,
+          -0.6083,  0.0065, -0.5868,  0.0396, -0.5643,  0.0731,
+          -0.5372,  0.1041, -0.5033,  0.1259, -0.4662,  0.1406,
+          -0.4275,  0.1493, -0.3881,  0.1530, -0.3487,  0.1526,
+          -0.3095,  0.1488, -0.2708,  0.1421, -0.2319,  0.1342,
+          -0.1943,  0.1217, -0.1600,  0.1025, -0.1290,  0.0785,
+          -0.1012,  0.0509, -0.0764,  0.0206, -0.0547, -0.0120,
+          -0.0378, -0.0472, -0.0324, -0.0857, -0.0389, -0.1241,
+          -0.0546, -0.1599, -0.0814, -0.1876, -0.1193, -0.1964,
+          -0.1582, -0.1935, -0.1931, -0.1769, -0.2157, -0.1453,
+          -0.2290, -0.1085, -0.2327, -0.0697, -0.2240, -0.0317,
+          -0.2064,  0.0033, -0.1853,  0.0362, -0.1613,  0.0672,
+          -0.1350,  0.0961, -0.1051,  0.1213, -0.0706,  0.1397,
+          -0.0332,  0.1512,  0.0053,  0.1580,  0.0442,  0.1624,
+           0.0833,  0.1636,  0.1224,  0.1615,  0.1613,  0.1565,
+           0.1999,  0.1500,  0.2378,  0.1402,  0.2749,  0.1279,
+           0.3118,  0.1147,  0.3487,  0.1015,  0.3858,  0.0892,
+           0.4236,  0.0787,  0.4621,  0.0715,  0.5012,  0.0702,
+           0.5398,  0.0766,  0.5768,  0.0890,  0.6123,  0.1055,
+           0.6466,  0.1244,  0.6805,  0.1440,  0.7147,  0.1630,
+           0.7500,  0.1800
+        ],
+        [
+          -0.7500,  0.0000, -0.7033,  0.0195, -0.6569,  0.0399,
+          -0.6104,  0.0600, -0.5634,  0.0789, -0.5155,  0.0954,
+          -0.4667,  0.1089, -0.4174,  0.1206, -0.3676,  0.1299,
+          -0.3174,  0.1365, -0.2669,  0.1398, -0.2162,  0.1391,
+          -0.1658,  0.1347, -0.1157,  0.1271, -0.0661,  0.1169,
+          -0.0170,  0.1046,  0.0316,  0.0903,  0.0791,  0.0728,
+           0.1259,  0.0534,  0.1723,  0.0331,  0.2188,  0.0129,
+           0.2656, -0.0064,  0.3122, -0.0263,  0.3586, -0.0466,
+           0.4052, -0.0665,  0.4525, -0.0847,  0.5007, -0.1002,
+           0.5497, -0.1130,  0.5991, -0.1240,  0.6491, -0.1325,
+           0.6994, -0.1380,  0.7500, -0.1400
+        ]
+      ],
+      WIND_OFFSETS = [
+        {start: 0.36, end: 0.11},
+        {start: 0.56, end: 0.16}
       ];
 
   function leaf(ctx, t, x, y, cw, s, color) {
@@ -395,63 +435,95 @@ var Skycons;
     ctx.stroke();
   }
 
-  function swoosh(ctx, t, cx, cy, cw, s, color) {
+  function swoosh(ctx, t, cx, cy, cw, s, index, total, color) {
     t /= 4000;
 
-    var start = ((t - 0.36) % 1) * (WIND_PATH.length / 2 - 1),
-        end   = ((t - 0.11) % 1) * (WIND_PATH.length / 2 - 1),
-        i, a, b, c, d, x, y;
+    var path = WIND_PATHS[index],
+        a = (t + index - WIND_OFFSETS[index].start) % total,
+        c = (t + index - WIND_OFFSETS[index].end  ) % total,
+        e = (t + index                            ) % total,
+        b, d, f, i;
 
     ctx.strokeStyle = color;
     ctx.lineWidth = s;
     ctx.lineCap = "round";
 
-    ctx.beginPath();
+    if(a < 1) {
+      ctx.beginPath();
 
-    b  = Math.floor(start);
-    a  = start - b;
-    b *= 2;
-    d  = Math.floor(end);
-    c  = end - d;
-    d *= 2;
+      a *= path.length / 2 - 1;
+      b  = Math.floor(a);
+      a -= b;
+      b *= 2;
+      b += 2;
 
-    x  = cx + (WIND_PATH[b + 0] * (1 - a) + WIND_PATH[b + 2] * a) * cw;
-    y  = cy + (WIND_PATH[b + 1] * (1 - a) + WIND_PATH[b + 3] * a) * cw;
-    ctx.moveTo(x, y);
+      ctx.moveTo(
+        cx + (path[b - 2] * (1 - a) + path[b    ] * a) * cw,
+        cy + (path[b - 1] * (1 - a) + path[b + 1] * a) * cw
+      );
 
-    if(b < d)
-      for(i = b; i !== d; i += 2)
-        ctx.lineTo(cx + WIND_PATH[i + 2] * cw, cy + WIND_PATH[i + 3] * cw);
+      if(c < 1) {
+        c *= path.length / 2 - 1;
+        d  = Math.floor(c);
+        c -= d;
+        d *= 2;
+        d += 2;
 
-    else {
-      for(i = b + 2; i !== WIND_PATH.length; i += 2)
-        ctx.lineTo(cx + WIND_PATH[i] * cw, cy + WIND_PATH[i + 1] * cw);
+        for(i = b; i !== d; i += 2)
+          ctx.lineTo(cx + path[i] * cw, cy + path[i + 1] * cw);
 
-      ctx.moveTo(cx + WIND_PATH[0] * cw, cy + WIND_PATH[1] * cw); 
+        ctx.lineTo(
+          cx + (path[d - 2] * (1 - c) + path[d    ] * c) * cw,
+          cy + (path[d - 1] * (1 - c) + path[d + 1] * c) * cw
+        );
+      }
 
-      for(i = 0; i !== d; i += 2)
-        ctx.lineTo(cx + WIND_PATH[i + 2] * cw, cy + WIND_PATH[i + 3] * cw);
+      else
+        for(i = b; i !== path.length; i += 2)
+          ctx.lineTo(cx + path[i] * cw, cy + path[i + 1] * cw);
+
+      ctx.stroke();
     }
 
-    x  = cx + (WIND_PATH[d + 0] * (1 - c) + WIND_PATH[d + 2] * c) * cw;
-    y  = cy + (WIND_PATH[d + 1] * (1 - c) + WIND_PATH[d + 3] * c) * cw;
-    ctx.lineTo(x, y);
+    else if(c < 1) {
+      ctx.beginPath();
 
-    ctx.stroke();
+      c *= path.length / 2 - 1;
+      d  = Math.floor(c);
+      c -= d;
+      d *= 2;
+      d += 2;
 
-    var m = (t % 1) * (WIND_PATH.length / 2 - 1),
-        n = Math.floor(m);
+      ctx.moveTo(cx + path[0] * cw, cy + path[1] * cw);
 
-    m -= n;
-    n *= 2;
+      for(i = 2; i !== d; i += 2)
+        ctx.lineTo(cx + path[i] * cw, cy + path[i + 1] * cw);
 
-    x = cx + (WIND_PATH[n + 0] * (1 - m) + WIND_PATH[n + 2] * m) * cw;
-    y = cy + (WIND_PATH[n + 1] * (1 - m) + WIND_PATH[n + 3] * m) * cw;
+      ctx.lineTo(
+        cx + (path[d - 2] * (1 - c) + path[d    ] * c) * cw,
+        cy + (path[d - 1] * (1 - c) + path[d + 1] * c) * cw
+      );
 
-    ctx.fillStyle = "red";
-    circle(ctx, cx + x * cw, cy + y * cw, s);
+      ctx.stroke();
+    }
 
-    leaf(ctx, t, x, y, cw, s, color);
+    if(e < 1) {
+      e *= path.length / 2 - 1;
+      f  = Math.floor(e);
+      e -= f;
+      f *= 2;
+      f += 2;
+
+      leaf(
+        ctx,
+        t,
+        cx + (path[f - 2] * (1 - e) + path[f    ] * e) * cw,
+        cy + (path[f - 1] * (1 - e) + path[f + 1] * e) * cw,
+        cw,
+        s,
+        color
+      );
+    }
   }
 
   Skycons = function(opts) {
@@ -534,8 +606,8 @@ var Skycons;
         h = ctx.canvas.height,
         s = Math.min(w, h);
 
-    swoosh(ctx, t, w * 0.5, h * 0.5, s, s * STROKE, color);
-    //leaf(ctx, t, w * 0.5, h * 0.5, s, s * STROKE, color);
+    swoosh(ctx, t, w * 0.5, h * 0.5, s, s * STROKE, 0, 2, color);
+    swoosh(ctx, t, w * 0.5, h * 0.5, s, s * STROKE, 1, 2, color);
   };
 
   Skycons.FOG = function(ctx, t, color) {
