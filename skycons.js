@@ -569,40 +569,53 @@ var Skycons;
   };
 
   Skycons.prototype = {
-    add: function(id, draw) {
-      var obj = {
-            id: id,
-            ctx: document.getElementById(id).getContext("2d"),
-            func: draw
-          };
+    add: function(el, draw) {
+      var obj;
+
+      if(typeof el === "string")
+        el = document.getElementById(el);
+
+      obj = {
+        element: el,
+        context: el.getContext("2d"),
+        drawing: draw
+      };
 
       this.list.push(obj);
       this.draw(obj, KEYFRAME);
     },
-    set: function(id, draw) {
+    set: function(el, draw) {
       var i;
 
+      if(typeof el === "string")
+        el = document.getElementById(el);
+
       for(i = this.list.length; i--; )
-        if(this.list[i].id === id) {
-          this.list[i].func = draw;
+        if(this.list[i].element === el) {
+          this.list[i].drawing = draw;
           this.draw(this.list[i], KEYFRAME);
           return;
         }
 
-      this.add(id, draw);
+      this.add(el, draw);
     },
-    remove: function(id) {
+    remove: function(el) {
       var i;
 
+      if(typeof el === "string")
+        el = document.getElementById(el);
+
       for(i = this.list.length; i--; )
-        if(this.list[i].id === id) {
+        if(this.list[i].element === el) {
           this.list.splice(i, 1);
           return;
         }
     },
     draw: function(obj, time) {
-      obj.ctx.clearRect(0, 0, obj.ctx.canvas.width, obj.ctx.canvas.height);
-      obj.func(obj.ctx, time, this.color);
+      var canvas = obj.context.canvas;
+
+      obj.context.clearRect(0, 0, canvas.width, canvas.height);
+      obj.drawing(obj.context, time, this.color);
     },
     play: function() {
       var self = this;
