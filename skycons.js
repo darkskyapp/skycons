@@ -674,7 +674,13 @@ var Skycons;
     draw: function(obj, time) {
       var canvas = obj.context.canvas;
 
-      obj.context.clearRect(0, 0, canvas.width, canvas.height);
+      // Clear the canvas.
+      // We have to do it the funky way because clearRect doesn't work on Android.
+      // FU, Android.
+      obj.context.globalCompositeOperation = 'destination-out';
+      obj.context.fillRect(0, 0, canvas.width, canvas.height);
+      obj.context.globalCompositeOperation = 'source-over';
+
       obj.drawing(obj.context, time, this.color);
     },
     play: function() {
