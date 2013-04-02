@@ -206,6 +206,7 @@ var Skycons;
     ctx.strokeStyle = color;
     ctx.lineWidth = s;
     ctx.lineCap = "round";
+    ctx.lineJoin = "round";
 
     ctx.beginPath();
     ctx.arc(cx, cy, a, 0, TWO_PI, false);
@@ -230,6 +231,7 @@ var Skycons;
     ctx.strokeStyle = color;
     ctx.lineWidth = s;
     ctx.lineCap = "round";
+    ctx.lineJoin = "round";
 
     cx += c * b;
 
@@ -272,6 +274,7 @@ var Skycons;
     ctx.strokeStyle = color;
     ctx.lineWidth = s * 0.5;
     ctx.lineCap = "round";
+    ctx.lineJoin = "round";
 
     for(i = 4; i--; ) {
       p = (t + i / 4) % 1;
@@ -300,6 +303,7 @@ var Skycons;
     ctx.strokeStyle = color;
     ctx.lineWidth = s * 0.5;
     ctx.lineCap = "round";
+    ctx.lineJoin = "round";
 
     for(i = 4; i--; ) {
       p = (t + i / 4) % 1;
@@ -416,6 +420,7 @@ var Skycons;
     ctx.strokeStyle = color;
     ctx.lineWidth = s;
     ctx.lineCap = "round";
+    ctx.lineJoin = "round";
 
     ctx.beginPath();
     ctx.arc(x        , y        , a, d          , d + Math.PI, false);
@@ -439,6 +444,7 @@ var Skycons;
     ctx.strokeStyle = color;
     ctx.lineWidth = s;
     ctx.lineCap = "round";
+    ctx.lineJoin = "round";
 
     if(a < 1) {
       ctx.beginPath();
@@ -623,6 +629,7 @@ var Skycons;
     ctx.strokeStyle = color;
     ctx.lineWidth = k;
     ctx.lineCap = "round";
+    ctx.lineJoin = "round";
 
     line(ctx, a + w * 0.2 + k * 0.5, e, b + w * 0.8 - k * 0.5, e);
     line(ctx, c + w * 0.2 + k * 0.5, f, d + w * 0.8 - k * 0.5, f);
