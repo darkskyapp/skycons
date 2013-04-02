@@ -525,9 +525,10 @@ var Skycons;
   }
 
   Skycons = function(opts) {
-    this.list     = [];
-    this.interval = null;
-    this.color    = opts && opts.color ? opts.color : "black";
+    this.list        = [];
+    this.interval    = null;
+    this.color       = opts && opts.color ? opts.color : "black";
+    this.resizeClear = !!(opts && opts.resizeClear);
   };
 
   Skycons.CLEAR_DAY = function(ctx, t, color) {
@@ -681,12 +682,11 @@ var Skycons;
     draw: function(obj, time) {
       var canvas = obj.context.canvas;
 
-      // Clear the canvas.
-      // We have to do it the funky way because clearRect doesn't work on Android.
-      // FU, Android.
-      obj.context.globalCompositeOperation = 'destination-out';
-      obj.context.fillRect(0, 0, canvas.width, canvas.height);
-      obj.context.globalCompositeOperation = 'source-over';
+      if(this.resizeClear)
+        canvas.width = canvas.width;
+
+      else
+        obj.context.clearRect(0, 0, canvas.width, canvas.height);
 
       obj.drawing(obj.context, time, this.color);
     },
