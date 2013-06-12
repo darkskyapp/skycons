@@ -1,5 +1,3 @@
-var Skycons;
-
 (function(global) {
   "use strict";
 
@@ -524,7 +522,7 @@ var Skycons;
     }
   }
 
-  Skycons = function(opts) {
+  var Skycons = global.Skycons = function(opts) {
     this.list        = [];
     this.interval    = null;
     this.color       = opts && opts.color ? opts.color : "black";
