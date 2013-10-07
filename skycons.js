@@ -522,12 +522,12 @@
     }
   }
 
-  var Skycons = global.Skycons = function(opts) {
-    this.list        = [];
-    this.interval    = null;
-    this.color       = opts && opts.color ? opts.color : "black";
-    this.resizeClear = !!(opts && opts.resizeClear);
-  };
+  var Skycons = function(opts) {
+        this.list        = [];
+        this.interval    = null;
+        this.color       = opts && opts.color ? opts.color : "black";
+        this.resizeClear = !!(opts && opts.resizeClear);
+      };
 
   Skycons.CLEAR_DAY = function(ctx, t, color) {
     var w = ctx.canvas.width,
@@ -709,4 +709,6 @@
       }
     }
   };
+
+  global.Skycons = Skycons;
 }(this));
