@@ -641,6 +641,10 @@
       if(typeof el === "string")
         el = document.getElementById(el);
 
+      // Does nothing if canvas name doesn't exists
+      if (el == null)
+        return;
+
       obj = {
         element: el,
         context: el.getContext("2d"),
