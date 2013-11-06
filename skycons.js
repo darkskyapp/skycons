@@ -642,7 +642,7 @@
         el = document.getElementById(el);
 
       // Does nothing if canvas name doesn't exists
-      if (el == null)
+      if(el === null)
         return;
 
       obj = {
