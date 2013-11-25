@@ -110,6 +110,9 @@
   <span class="comment">// ...or by the canvas DOM element itself.</span>
   skycons.add(document.getElementById(<span class="constant">"icon2"</span>), Skycons.RAIN);
 
+  <span class="comment">// if you're using the Forecast API, you can also supply
+  strings: "partly-cloudy-day" or "rain".</span>
+
   <span class="comment">// start animation!</span>
   skycons.play();
 
@@ -135,18 +138,16 @@
     <script src="skycons.js"></script>
 
     <script>
-      var icons = new Skycons();
+      var icons = new Skycons(),
+          list  = [
+            "clear-day", "clear-night", "partly-cloudy-day",
+            "partly-cloudy-night", "cloudy", "rain", "sleet", "snow", "wind",
+            "fog"
+          ],
+          i;
 
-      icons.set("clear-day", Skycons.CLEAR_DAY);
-      icons.set("clear-night", Skycons.CLEAR_NIGHT);
-      icons.set("partly-cloudy-day", Skycons.PARTLY_CLOUDY_DAY);
-      icons.set("partly-cloudy-night", Skycons.PARTLY_CLOUDY_NIGHT);
-      icons.set("cloudy", Skycons.CLOUDY);
-      icons.set("rain", Skycons.RAIN);
-      icons.set("sleet", Skycons.SLEET);
-      icons.set("snow", Skycons.SNOW);
-      icons.set("wind", Skycons.WIND);
-      icons.set("fog", Skycons.FOG);
+      for(i = list.length; i--; )
+        icons.set(list[i], list[i]);
 
       icons.play();
     </script>

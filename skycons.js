@@ -645,6 +645,15 @@
       if(el === null)
         return;
 
+      if(typeof draw === "string") {
+        draw = draw.toUpperCase().replace(/-/g, "_");
+        draw = Skycons.hasOwnProperty(draw) ? Skycons[draw] : null;
+      }
+
+      // Does nothing if the draw function isn't actually a function
+      if(typeof draw !== "function")
+        return;
+
       obj = {
         element: el,
         context: el.getContext("2d"),
