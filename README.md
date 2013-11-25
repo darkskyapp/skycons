@@ -10,6 +10,7 @@ lightweight, so they shouldn't rain on your parade:
 
     <script>
       var skycons = new Skycons({"color": "pink"});
+      // on Android, a nasty hack is needed: {"resizeClear": true}
 
       // you can add a canvas by it's ID...
       skycons.add("icon1", Skycons.PARTLY_CLOUDY_DAY);
