@@ -18,6 +18,9 @@ lightweight, so they shouldn't rain on your parade:
       // ...or by the canvas DOM element itself.
       skycons.add(document.getElementById("icon2"), Skycons.RAIN);
 
+      // if you're using the Forecast API, you can also supply
+      // strings: "partly-cloudy-day" or "rain".
+
       // start animation!
       skycons.play();
 
