@@ -635,6 +635,12 @@
   };
 
   Skycons.prototype = {
+    _determineDrawingFunction: function(draw) {
+      if(typeof draw === "string") {
+        draw = draw.toUpperCase().replace(/-/g, "_");
+        return Skycons.hasOwnProperty(draw) ? Skycons[draw] : null;
+      }
+    },
     add: function(el, draw) {
       var obj;
 
@@ -645,10 +651,7 @@
       if(el === null)
         return;
 
-      if(typeof draw === "string") {
-        draw = draw.toUpperCase().replace(/-/g, "_");
-        draw = Skycons.hasOwnProperty(draw) ? Skycons[draw] : null;
-      }
+      draw = this._determineDrawingFunction(draw);
 
       // Does nothing if the draw function isn't actually a function
       if(typeof draw !== "function")
@@ -671,7 +674,7 @@
 
       for(i = this.list.length; i--; )
         if(this.list[i].element === el) {
-          this.list[i].drawing = draw;
+          this.list[i].drawing = this._determineDrawingFunction(draw);
           this.draw(this.list[i], KEYFRAME);
           return;
         }
