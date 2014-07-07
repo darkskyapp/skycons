@@ -636,10 +636,10 @@
 
   Skycons.prototype = {
     _determineDrawingFunction: function(draw) {
-      if(typeof draw === "string") {
-        draw = draw.toUpperCase().replace(/-/g, "_");
-        return Skycons.hasOwnProperty(draw) ? Skycons[draw] : null;
-      }
+      if(typeof draw === "string")
+        draw = Skycons[draw.toUpperCase().replace(/-/g, "_")] || null;
+
+      return draw;
     },
     add: function(el, draw) {
       var obj;
