@@ -46,5 +46,5 @@ Variants
 
 Several kind folks have made variants of Skycons:
 
-*   [Color Skycons](https://github.com/maxdow/skycons) by Maxime Warner
+*   [Color Skycons](https://github.com/maxdow/skycons) by Maxime Warnier
 *   [Skycons for Android](https://github.com/torryharris/Skycons) by Torry Harris
