@@ -715,7 +715,6 @@
       }, 1000 / 60);
     },
     pause: function() {
-
       if(this.interval) {
         cancelInterval(this.interval);
         this.interval = null;
