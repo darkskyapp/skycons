@@ -1,0 +1,8 @@
+{
+  "name": "skycons",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:thedyrt/skycons.git",
+  "author": "Greg Larrenaga <greg@thedyrt.com>",
+  "license": "MIT"
+}
