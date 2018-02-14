@@ -1,8 +1,8 @@
 {
   "name": "skycons",
   "version": "1.0.0",
-  "main": "index.js",
-  "repository": "git@github.com:thedyrt/skycons.git",
-  "author": "Greg Larrenaga <greg@thedyrt.com>",
+  "main": "skycons.js",
+  "repository": "git@github.com:darkskyapp/skycons.git",
+  "author": "The Dark Sky Company, LLC <http://darksky.net/>",
   "license": "MIT"
 }
